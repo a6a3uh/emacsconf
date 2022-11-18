@@ -1,1 +1,12 @@
 *.*~
+.cache/
+.lsp-session-v1
+custom-vars.el
+eln-cache/
+elpa/
+eshell/
+history
+places
+projectile-bookmarks.eld
+recentf
+transient/
