@@ -10,3 +10,7 @@ places
 projectile-bookmarks.eld
 recentf
 transient/
+/request/
+/org-roam.db
+/elpy/
+/.org-id-locations

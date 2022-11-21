@@ -10,16 +10,17 @@
 (setq visible-bell t)
 
 ;; Display line numbers
-(global-display-line-numbers-mode 1)
+;; (global-display-line-numbers-mode 1)
 (column-number-mode)
 ;; Do not display line numbers in certain modes
-(dolist (mode '(org-mode-hook
-                term-mode-hook
-                eshell-mode-hook
-                vterm-mode-hook
-                treemacs-mode-hook
-                shell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+;; (dolist (mode '(org-mode-hook
+;;                 term-mode-hook
+;;                 eshell-mode-hook
+;;                 vterm-mode-hook
+;;                 treemacs-mode-hook
+;;                 mu4e-main-mode-hook
+;;                 shell-mode-hook))
+;;   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 ;; Load customizable theme
 (load-theme 'modus-vivendi t)
@@ -147,6 +148,34 @@
     "t" '(:ignore t :which-key "toggles")
     "tt" '(counsel-load-theme :which-key "choose-theme")))
 
+(use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1)
+  :custom ((doom-modeline-height 15)))
+
+(use-package all-the-icons
+  :if (display-graphic-p))
+
+(use-package dired-single)
+
+(use-package dired
+  :after evil-collection
+  :ensure nil
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package all-the-icons-dired)
+(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+
+(use-package dired-hide-dotfiles
+  :after evil-collection
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
 ;; Good mode with bad name
 (use-package evil
   :init
@@ -167,7 +196,7 @@
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
-  :after evil
+  :after (evil mu4e)
   :config
   (evil-collection-init))
 
@@ -226,8 +255,8 @@
  '((emacs-lisp . t)
    (julia . t)
    (python . t)
-;;   (ein . t)
-;;   (jupyter . t)
+   (ein . t)
+   (jupyter . t)
    ))
 
 (push '("conf-unix" . conf-unix) org-src-lang-modes)
@@ -245,16 +274,33 @@
     (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 
+(use-package julia-mode)
+(require 'julia-mode)
+
+(use-package lsp-julia)
+
+(use-package  julia-repl)
+(add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
+(add-hook 'julia-mode-hook #'lsp-mode)
+;; (add-hook 'julia-mode-hook (setq-local lsp-enable-folding t
+;;                                        lsp-folding-range-limit 100))
+
 (use-package lsp-mode
   :commands (lsp lsp-deferred)
   :init
   (setq lsp-keymap-prefix "C-c l") ;; 'C-l', 's-l'
+  (setq lsp-prefer-flymake nil)
   :config
-  (lsp-enable-which-key-integration t))
+  (lsp-enable-which-key-integration t)
+  :hook
+  ((python-mode . lsp)))
 
 (use-package lsp-ui)
 
 (use-package lsp-ivy)
+
+(use-package jupyter)
+(require 'jupyter)
 
 (use-package company
   :after lsp-mode
@@ -273,7 +319,87 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
+(use-package flycheck)
+
+(use-package vterm)
+
 (use-package eshell-git-prompt)
 (use-package eshell
   :config
   (eshell-git-prompt-use-theme 'powerline))
+
+(use-package ein)
+
+(use-package org-fragtog)
+(add-hook 'org-mode-hook 'org-fragtog-mode)
+
+(use-package pdf-tools)
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory "~/org/roam")
+  (org-roam-completion-everywhere t)
+  :bind (("C-c n l" . org-roam-buffer-toggle)
+         ("C-c n f" . org-roam-node-find)
+         ("C-c n i" . org-roam-node-insert)
+         :map org-mode-map
+         ("C-M-i" . completion-at-point))
+  :config
+  (org-roam-setup))
+
+(use-package citar
+  :after oc
+  :bind (("C-c b" . citar-insert-citation)
+         :map minibuffer-local-map
+         ("M-b" . citar-insert-preset))
+  :custom
+  (citar-bibliography '("~/yadisk/phd/phd.bib"))
+  (citar-library-paths '("~/yadisk/phd/papers"))
+  (citar-notes-paths '("~/org/roam/references"))
+  (citar-file-extensions '("pdf" "org" "md"))
+  (org-cite-insert-processor 'citar)
+  (org-cite-follow-processor 'citar)
+  (org-cite-activate-processor 'citar)
+  )
+
+(use-package org-ref)
+
+(use-package org-roam-bibtex)
+
+(use-package djvu)
+
+(setq
+   org-startup-with-latex-preview t
+)
+
+(use-package mu4e
+  :ensure nil
+  :load-path "/usr/share/emacs/site-lisp/mu4e/"
+  :defer 20 ; Wait until 20 seconds after startup
+  :config
+  (mu4e t)
+
+  ;; (setq +mu4e-gmail-accounts '(("ali.tlisov@gmail.com" . "/Gmail")))
+  (setq mu4e-headers-buffer-name "*mu4e-headers*")
+  ;; This is set to 't' to avoid mail syncing issues when using mbsync
+  (setq mu4e-change-filenames-when-moving t)
+
+  ;; Refresh mail using isync every 10 minutes
+  (setq mu4e-update-interval (* 10 60))
+  (setq mu4e-get-mail-command "mbsync gmail")
+  (setq mu4e-maildir "~/Mail")
+
+  (setq mu4e-drafts-folder "/Drafts")
+  (setq mu4e-sent-folder   "/Sent")
+  (setq mu4e-refile-folder "/Archive")
+  (setq mu4e-trash-folder  "/Trash")
+
+  ;; (setq mu4e-maildir-shortcuts
+  ;;       '(("/Inbox" . ?i)
+  ;;         ("/Sent" . ?s)
+  ;;         ("/Trash" . ?t)
+  ;;         ("/Drafts" . ?d)
+  ;;         ("/Archive" . ?a)))
+  ;;
+  )
