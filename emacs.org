@@ -1,8 +1,45 @@
 #+title Emacs configuration
 #+property: header-args:emacs-lisp :tangle ./init.el :mkdirp yes :results no
  
-* Basic UI Configuration
+* Package management
+#+begin_src emacs-lisp
+  (defvar bootstrap-version)
+  (let ((bootstrap-file
+         (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                           user-emacs-directory))
+        (bootstrap-vesrion 5))
+    (unless (file-exists-p bootstrap-file)
+      (with-current-buffer
+          (url-retrieve-synchronously
+           "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+           'silent 'inhibit-cookies)
+        (goto-char (point-max))
+        (eval-print-last-sexp)))
+    (load bootstrap-file nil 'nomessage))
+#+end_src
 
+#+begin_src emacs-lisp
+  (straight-use-package 'use-package)
+  (setq straight-use-package-by-default t)
+#+end_src
+* Env Variables
+#+begin_src emacs-lisp
+(use-package exec-path-from-shell)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+#+end_src
+
+#+begin_src emacs-lisp
+  (cl-case system-type
+        ('gnu/linux (setq yadisk-path "~/yadisk"
+                            org-path "~/org"))
+        ('windows-nt (setq yadisk-path "~/yadisk"
+                             org-path "~/yadisk/org"))
+        )
+#+end_src
+* Basic UI Configuration
+** Basics
+Some toggles
 #+begin_src emacs-lisp
   (setq inhibit-startup-message t)
 
@@ -12,28 +49,17 @@
   (tooltip-mode -1)    ;; Disable tooltips
   (set-fringe-mode 10) ;; some spacing around
 
+  ;; Don't pop up UI dialogs when prompting
+  (setq use-dialog-box nil)
+
   ;; Flashes when you hit limits
   (setq visible-bell t)
 
-  ;; Display line numbers
-  ;; (global-display-line-numbers-mode 1)
   (column-number-mode)
-  ;; Do not display line numbers in certain modes
-  ;; (dolist (mode '(org-mode-hook
-  ;;                 term-mode-hook
-  ;;                 eshell-mode-hook
-  ;;                 vterm-mode-hook
-  ;;                 treemacs-mode-hook
-  ;;                 mu4e-main-mode-hook
-  ;;                 shell-mode-hook))
-  ;;   (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+end_src
 
-  ;; Load customizable theme
-  (load-theme 'modus-vivendi t)
-
-  ;; Make ESC quit prompts
-  ;;(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
-
+Some history
+#+begin_src emacs-lisp
   ;; Open recent files
   (recentf-mode 1)
 
@@ -43,21 +69,30 @@
 
   ;; Remember and restore the last cursor location of opened files
   (save-place-mode 1)
+#+end_src
 
+Custom variables
+#+begin_src emacs-lisp
   ;; Move customization variables to a separate file and load it
   (setq custom-file (locate-user-emacs-file "custom-vars.el"))
+
   (load custom-file 'noerror 'nomessage)
 
-  ;; Don't pop up UI dialogs when prompting
-  (setq use-dialog-box nil)
+#+end_src
 
+Some reverts
+#+begin_src emacs-lisp
   ;; Revert the buffers when the underlying file has changed
   (global-auto-revert-mode 1)
 
   ;; Revert Dired and other buffers when files in folder added for example
   (setq global-auto-revert-none-file-buffers t)
 #+end_src
-
+** Theme
+#+begin_src emacs-lisp
+  ;; Load customizable theme
+  (load-theme 'modus-vivendi t)
+#+end_src
 ** Font Configuration
 
 #+begin_src emacs-lisp
@@ -67,27 +102,6 @@
 
 #+end_src
 
-* Package management
-#+begin_src emacs-lisp
-;; Initialize package sources
-(require 'package)
-
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-;;			 ("melpa-stable" . "https://stable.melpa.org/packges/")
-			 ("org" . "https://orgmode.org/elpa/")
-			 ("elpa" . "https://elpa.gnu.org/packages/")))
-
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; Initialize use-package on non-Linux platfroms
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(require 'use-package)
-(setq use-package-always-ensure t)
-#+end_src
 * Autocompletion
 #+begin_src emacs-lisp
 ;; Autocompletion
@@ -111,34 +125,53 @@
 #+end_src
 
 * Advanced UI
-#+begin_src emacs-lisp
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-	 ("C-x b" . counsel-ibuffer)
-	 ("C-x C-f" . counsel-find-file)
-	 :map minibuffer-local-map
-	 ("C-r" . counsel-minibufer-history)))
-;;  :config
-;;  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
+# Does not works, no tangling #TODO
+#+begin_src emacs-lisp :tangle no
+  (straight-use-package
+   '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
+  ;; (require 'nano)
+  (require 'nano-theme)
+  (require 'nano-modeline)
+  ;;(nano-dark)
+#+end_src
 
+
+#+begin_src emacs-lisp
+  (use-package counsel
+    :bind (("M-x" . counsel-M-x)
+           ("C-x b" . counsel-ibuffer)
+           ("C-x C-f" . counsel-find-file)
+           :map minibuffer-local-map
+           ("C-r" . counsel-minibufer-history))
+    :config
+    (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
+#+end_src
+
+#+begin_src emacs-lisp
 ;; parences rainbow highliht
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
 
+#+begin_src emacs-lisp
 ;; Shows available keys at the bottom
 (use-package which-key
   :init (which-key-mode)
   :diminish  which-key-mode
   :config
   (setq which-key-idle-delay 0.3))
+#+end_src
 
+#+begin_src emacs-lisp
 ;; Better Ivy / counsel print with rows of additional data
 ;; Generates a bunch of warning during install
 ;; But seems works. Maybe latest gihub version would do better.
 (use-package ivy-rich
   :init
   (ivy-rich-mode 1))
+#+end_src
 
+#+begin_src emacs-lisp
 ;; Should provide extended help but it does not somehow
 (use-package helpful
   :custom
@@ -149,7 +182,9 @@
   ([remap describe-command] . helpful-command)
   ([remap describe-variable] . counsel-describe-variable)
   ([remap describe-key] .  helpful-key))
+#+end_src
 
+#+begin_src emacs-lisp
 ;; Suff for key bindings
 (use-package general
   :config
@@ -171,7 +206,7 @@
 
 #+begin_src emacs-lisp
   (use-package doom-modeline
-    :ensure t
+    :straight t
     :init (doom-modeline-mode 1)
     :custom ((doom-modeline-height 15)))
 #+end_src
@@ -188,7 +223,7 @@
 #+begin_src emacs-lisp
   (use-package dired
     :after evil-collection
-    :ensure nil
+    :straight nil
     :config
     (evil-collection-define-key 'normal 'dired-mode-map
       "h" 'dired-single-up-directory
@@ -226,11 +261,14 @@
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
+  ;; Make ESC quit prompts
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
-  :after (evil mu4e)
+  :after evil
   :config
   (evil-collection-init))
 #+end_src
@@ -297,23 +335,6 @@
 	org-src-fontify-natively t))
 #+end_src
 ** Languages
-#+begin_src emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (julia . t)
-   (python . t)
-   (ein . t)
-   (jupyter . t)
-   ))
-#+end_src
-
-#+RESULTS:
-
-Writing config files with babel
-#+begin_src emacs-lisp
-(push '("conf-unix" . conf-unix) org-src-lang-modes) 
-#+end_src
 
 #+begin_src emacs-lisp
 (require 'org-tempo)
@@ -321,8 +342,15 @@ Writing config files with babel
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
+(add-to-list 'org-structure-template-alist '("jl" . "src julia"))
+(add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
 #+end_src
-
+#+begin_src emacs-lisp
+(defun my/org-confirm-babel-evaluate (lang body)
+  (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
+(setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
+#+end_src
 ** Auto tangle
 #+begin_src emacs-lisp
   (defun my/org-babel-tangle-config ()
@@ -341,7 +369,7 @@ Writing config files with babel
 *** Julia
 #+begin_src emacs-lisp
   (use-package julia-mode)
-  (require 'julia-mode)
+  ;; (require 'julia-mode)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -381,11 +409,28 @@ Writing config files with babel
 *** Jupyter
 #+begin_src emacs-lisp
   (use-package jupyter)
-  (require 'jupyter)
+  ;; (require 'jupyter)
 #+end_src
 
-#+RESULTS:
-: jupyter
+#+begin_src emacs-lisp
+(use-package ein) 
+#+end_src
+
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (julia . t)
+   (python . t)
+   (ein . t)
+   (jupyter . t)
+   ))
+#+end_src
+Writing config files with babel
+#+begin_src emacs-lisp
+(push '("conf-unix" . conf-unix) org-src-lang-modes) 
+#+end_src
+
 
 *** Completion
 #+begin_src emacs-lisp
@@ -423,7 +468,8 @@ Writing config files with babel
 * Terminal
 ** VTerm
 #+begin_src emacs-lisp
-(use-package vterm)
+  (when (equal system-type 'gnu/linux)
+    (use-package vterm))
 #+end_src
 ** EShell
 #+begin_src emacs-lisp
@@ -433,10 +479,6 @@ Writing config files with babel
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
 * Math
-#+begin_src emacs-lisp
-(use-package ein)
-#+end_src
-
 #+begin_src emacs-lisp
 (use-package org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
@@ -448,9 +490,9 @@ Writing config files with babel
 
 #+begin_src emacs-lisp
   (use-package org-roam
-    :ensure t
+    :straight t
     :custom
-    (org-roam-directory "~/org/roam")
+    (org-roam-directory (concat org-path "/roam"))
     (org-roam-completion-everywhere t)
     :bind (("C-c n l" . org-roam-buffer-toggle)
            ("C-c n f" . org-roam-node-find)
@@ -468,9 +510,9 @@ Writing config files with babel
            :map minibuffer-local-map
            ("M-b" . citar-insert-preset))
     :custom
-    (citar-bibliography '("~/yadisk/phd/phd.bib"))
-    (citar-library-paths '("~/yadisk/phd/papers"))
-    (citar-notes-paths '("~/org/roam/references"))
+    (citar-bibliography '(concat yadisk-path "/phd/phd.bib"))
+    (citar-library-paths '(concat yadisk-path "/phd/papers"))
+    (citar-notes-paths '(concat org-path "/roam/references"))
     (citar-file-extensions '("pdf" "org" "md"))
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
@@ -499,8 +541,9 @@ Writing config files with babel
 
 * Mail
 #+begin_src emacs-lisp
+  (when (equal system-type 'gnu/linux)
     (use-package mu4e
-      :ensure nil
+      :straight nil
       :load-path "/usr/share/emacs/site-lisp/mu4e/"
       :defer 20 ; Wait until 20 seconds after startup
       :config
@@ -528,5 +571,5 @@ Writing config files with babel
       ;;         ("/Drafts" . ?d)
       ;;         ("/Archive" . ?a)))
       ;;
-      )
+      ))
 #+end_src

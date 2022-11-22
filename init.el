@@ -1,3 +1,31 @@
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el"
+                         user-emacs-directory))
+      (bootstrap-vesrion 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+(straight-use-package 'use-package)
+(setq straight-use-package-by-default t)
+
+(use-package exec-path-from-shell)
+(when (memq window-system '(mac ns x))
+  (exec-path-from-shell-initialize))
+
+(cl-case system-type
+      ('gnu/linux (setq yadisk-path "~/yadisk"
+                          org-path "~/org"))
+      ('windows-nt (setq yadisk-path "~/yadisk"
+                           org-path "~/yadisk/org"))
+      )
+
 (setq inhibit-startup-message t)
 
 (menu-bar-mode -1)   ;; Disable menu bar
@@ -6,27 +34,13 @@
 (tooltip-mode -1)    ;; Disable tooltips
 (set-fringe-mode 10) ;; some spacing around
 
+;; Don't pop up UI dialogs when prompting
+(setq use-dialog-box nil)
+
 ;; Flashes when you hit limits
 (setq visible-bell t)
 
-;; Display line numbers
-;; (global-display-line-numbers-mode 1)
 (column-number-mode)
-;; Do not display line numbers in certain modes
-;; (dolist (mode '(org-mode-hook
-;;                 term-mode-hook
-;;                 eshell-mode-hook
-;;                 vterm-mode-hook
-;;                 treemacs-mode-hook
-;;                 mu4e-main-mode-hook
-;;                 shell-mode-hook))
-;;   (add-hook mode (lambda () (display-line-numbers-mode 0))))
-
-;; Load customizable theme
-(load-theme 'modus-vivendi t)
-
-;; Make ESC quit prompts
-;;(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
 ;; Open recent files
 (recentf-mode 1)
@@ -40,10 +54,8 @@
 
 ;; Move customization variables to a separate file and load it
 (setq custom-file (locate-user-emacs-file "custom-vars.el"))
-(load custom-file 'noerror 'nomessage)
 
-;; Don't pop up UI dialogs when prompting
-(setq use-dialog-box nil)
+(load custom-file 'noerror 'nomessage)
 
 ;; Revert the buffers when the underlying file has changed
 (global-auto-revert-mode 1)
@@ -51,28 +63,12 @@
 ;; Revert Dired and other buffers when files in folder added for example
 (setq global-auto-revert-none-file-buffers t)
 
+;; Load customizable theme
+(load-theme 'modus-vivendi t)
+
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
-
-;; Initialize package sources
-(require 'package)
-
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-;;			 ("melpa-stable" . "https://stable.melpa.org/packges/")
-			 ("org" . "https://orgmode.org/elpa/")
-			 ("elpa" . "https://elpa.gnu.org/packages/")))
-
-(package-initialize)
-(unless package-archive-contents
-  (package-refresh-contents))
-
-;; Initialize use-package on non-Linux platfroms
-(unless (package-installed-p 'use-package)
-  (package-install 'use-package))
-
-(require 'use-package)
-(setq use-package-always-ensure t)
 
 ;; Autocompletion
 (use-package ivy
@@ -95,12 +91,12 @@
 
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
-	 ("C-x b" . counsel-ibuffer)
-	 ("C-x C-f" . counsel-find-file)
-	 :map minibuffer-local-map
-	 ("C-r" . counsel-minibufer-history)))
-;;  :config
-;;  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
+         ("C-x b" . counsel-ibuffer)
+         ("C-x C-f" . counsel-find-file)
+         :map minibuffer-local-map
+         ("C-r" . counsel-minibufer-history))
+  :config
+  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
 
 ;; parences rainbow highliht
 (use-package rainbow-delimiters
@@ -149,7 +145,7 @@
     "tt" '(counsel-load-theme :which-key "choose-theme")))
 
 (use-package doom-modeline
-  :ensure t
+  :straight t
   :init (doom-modeline-mode 1)
   :custom ((doom-modeline-height 15)))
 
@@ -160,7 +156,7 @@
 
 (use-package dired
   :after evil-collection
-  :ensure nil
+  :straight nil
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-single-up-directory
@@ -192,11 +188,14 @@
   (evil-global-set-key 'motion "j" 'evil-next-visual-line)
   (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
+  ;; Make ESC quit prompts
+  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
 (use-package evil-collection
-  :after (evil mu4e)
+  :after evil
   :config
   (evil-collection-init))
 
@@ -250,22 +249,18 @@
 	org-hide-emphasis-markers t
 	org-src-fontify-natively t))
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (julia . t)
-   (python . t)
-   (ein . t)
-   (jupyter . t)
-   ))
-
-(push '("conf-unix" . conf-unix) org-src-lang-modes)
-
 (require 'org-tempo)
 
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
+(add-to-list 'org-structure-template-alist '("jl" . "src julia"))
+(add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
+
+(defun my/org-confirm-babel-evaluate (lang body)
+  (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
+(setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 
 (defun my/org-babel-tangle-config ()
 (when (string-equal (buffer-file-name)
@@ -275,7 +270,7 @@
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 
 (use-package julia-mode)
-(require 'julia-mode)
+;; (require 'julia-mode)
 
 (use-package lsp-julia)
 
@@ -300,7 +295,20 @@
 (use-package lsp-ivy)
 
 (use-package jupyter)
-(require 'jupyter)
+;; (require 'jupyter)
+
+(use-package ein)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (julia . t)
+   (python . t)
+   (ein . t)
+   (jupyter . t)
+   ))
+
+(push '("conf-unix" . conf-unix) org-src-lang-modes)
 
 (use-package company
   :after lsp-mode
@@ -321,14 +329,13 @@
 
 (use-package flycheck)
 
-(use-package vterm)
+(when (equal system-type 'gnu/linux)
+  (use-package vterm))
 
 (use-package eshell-git-prompt)
 (use-package eshell
   :config
   (eshell-git-prompt-use-theme 'powerline))
-
-(use-package ein)
 
 (use-package org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
@@ -336,9 +343,9 @@
 (use-package pdf-tools)
 
 (use-package org-roam
-  :ensure t
+  :straight t
   :custom
-  (org-roam-directory "~/org/roam")
+  (org-roam-directory (concat org-path "/roam"))
   (org-roam-completion-everywhere t)
   :bind (("C-c n l" . org-roam-buffer-toggle)
          ("C-c n f" . org-roam-node-find)
@@ -354,9 +361,9 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (citar-bibliography '("~/yadisk/phd/phd.bib"))
-  (citar-library-paths '("~/yadisk/phd/papers"))
-  (citar-notes-paths '("~/org/roam/references"))
+  (citar-bibliography '(concat yadisk-path "/phd/phd.bib"))
+  (citar-library-paths '(concat yadisk-path "/phd/papers"))
+  (citar-notes-paths '(concat org-path "/roam/references"))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
@@ -373,33 +380,34 @@
    org-startup-with-latex-preview t
 )
 
-(use-package mu4e
-  :ensure nil
-  :load-path "/usr/share/emacs/site-lisp/mu4e/"
-  :defer 20 ; Wait until 20 seconds after startup
-  :config
-  (mu4e t)
+(when (equal system-type 'gnu/linux)
+  (use-package mu4e
+    :straight nil
+    :load-path "/usr/share/emacs/site-lisp/mu4e/"
+    :defer 20 ; Wait until 20 seconds after startup
+    :config
+    (mu4e t)
 
-  ;; (setq +mu4e-gmail-accounts '(("ali.tlisov@gmail.com" . "/Gmail")))
-  (setq mu4e-headers-buffer-name "*mu4e-headers*")
-  ;; This is set to 't' to avoid mail syncing issues when using mbsync
-  (setq mu4e-change-filenames-when-moving t)
+    ;; (setq +mu4e-gmail-accounts '(("ali.tlisov@gmail.com" . "/Gmail")))
+    (setq mu4e-headers-buffer-name "*mu4e-headers*")
+    ;; This is set to 't' to avoid mail syncing issues when using mbsync
+    (setq mu4e-change-filenames-when-moving t)
 
-  ;; Refresh mail using isync every 10 minutes
-  (setq mu4e-update-interval (* 10 60))
-  (setq mu4e-get-mail-command "mbsync gmail")
-  (setq mu4e-maildir "~/Mail")
+    ;; Refresh mail using isync every 10 minutes
+    (setq mu4e-update-interval (* 10 60))
+    (setq mu4e-get-mail-command "mbsync gmail")
+    (setq mu4e-maildir "~/Mail")
 
-  (setq mu4e-drafts-folder "/Drafts")
-  (setq mu4e-sent-folder   "/Sent")
-  (setq mu4e-refile-folder "/Archive")
-  (setq mu4e-trash-folder  "/Trash")
+    (setq mu4e-drafts-folder "/Drafts")
+    (setq mu4e-sent-folder   "/Sent")
+    (setq mu4e-refile-folder "/Archive")
+    (setq mu4e-trash-folder  "/Trash")
 
-  ;; (setq mu4e-maildir-shortcuts
-  ;;       '(("/Inbox" . ?i)
-  ;;         ("/Sent" . ?s)
-  ;;         ("/Trash" . ?t)
-  ;;         ("/Drafts" . ?d)
-  ;;         ("/Archive" . ?a)))
-  ;;
-  )
+    ;; (setq mu4e-maildir-shortcuts
+    ;;       '(("/Inbox" . ?i)
+    ;;         ("/Sent" . ?s)
+    ;;         ("/Trash" . ?t)
+    ;;         ("/Drafts" . ?d)
+    ;;         ("/Archive" . ?a)))
+    ;;
+    ))
