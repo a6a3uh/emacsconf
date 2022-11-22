@@ -15,6 +15,8 @@
 (straight-use-package 'use-package)
 (setq straight-use-package-by-default t)
 
+(use-package no-littering)
+
 (use-package exec-path-from-shell)
 (when (memq window-system '(mac ns x))
   (exec-path-from-shell-initialize))
@@ -111,20 +113,23 @@
 
 ;; Shows available keys at the bottom
 (use-package which-key
-  :init (which-key-mode)
+  :defer 0
   :diminish  which-key-mode
   :config
+  (which-key-mode)
   (setq which-key-idle-delay 0.3))
 
 ;; Better Ivy / counsel print with rows of additional data
 ;; Generates a bunch of warning during install
 ;; But seems works. Maybe latest gihub version would do better.
 (use-package ivy-rich
+  :after ivy
   :init
   (ivy-rich-mode 1))
 
 ;; Should provide extended help but it does not somehow
 (use-package helpful
+  :commands (helpful-callable helpful-variable helpful-command helpful-key)
   :custom
   (counsel-describe-function-funciton #'helpful-callable)
   (counsel-describe-variable-function #'helpful-variable)
@@ -136,13 +141,14 @@
 
 ;; Suff for key bindings
 (use-package general
+  :after evil
   :config
   (general-evil-setup t)
   (general-create-definer rune/leader-keys
     :keymaps '(normal insrt visual emacs)
     :prefix "SPC"
     :global-prefix "C-SPC")
-  
+
   ;; Here bind some keys
   (general-define-key
    (kbd "<escape>") 'keyboard-escape-quit)
@@ -206,7 +212,8 @@
   :config
   (evil-collection-init))
 
-(use-package hydra)
+(use-package hydra
+  :defer t)
 
 (defhydra hydra-text-scale (:timeout 4)
   "scale text"
@@ -257,14 +264,15 @@
 	org-hide-emphasis-markers t
 	org-src-fontify-natively t))
 
-(require 'org-tempo)
+(with-eval-after-load 'org
+  (require 'org-tempo)
 
-(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-to-list 'org-structure-template-alist '("py" . "src python"))
-(add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
-(add-to-list 'org-structure-template-alist '("jl" . "src julia"))
-(add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
+  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+  (add-to-list 'org-structure-template-alist '("py" . "src python"))
+  (add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
+  (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
+  (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia")))
 
 (defun my/org-confirm-babel-evaluate (lang body)
   (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
@@ -303,20 +311,19 @@
 (use-package lsp-ivy)
 
 (use-package jupyter)
-;; (require 'jupyter)
 
 (use-package ein)
 
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (julia . t)
-   (python . t)
-   (ein . t)
-   (jupyter . t)
-   ))
-
-(push '("conf-unix" . conf-unix) org-src-lang-modes)
+(with-eval-after-load 'org
+  (org-babel-do-load-languages
+   'org-babel-load-languages
+   '((emacs-lisp . t)
+     (julia . t)
+     (python . t)
+     (ein . t)
+     (jupyter . t)
+     ))
+  (push '("conf-unix" . conf-unix) org-src-lang-modes) )
 
 (use-package company
   :after lsp-mode

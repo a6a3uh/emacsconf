@@ -22,6 +22,10 @@
   (straight-use-package 'use-package)
   (setq straight-use-package-by-default t)
 #+end_src
+* Keep Folders Clean
+#+begin_src emacs-lisp
+(use-package no-littering)
+#+end_src
 * Env Variables
 #+begin_src emacs-lisp
 (use-package exec-path-from-shell)
@@ -162,53 +166,57 @@ Some reverts
 #+end_src
 
 #+begin_src emacs-lisp
-;; Shows available keys at the bottom
-(use-package which-key
-  :init (which-key-mode)
-  :diminish  which-key-mode
-  :config
-  (setq which-key-idle-delay 0.3))
+  ;; Shows available keys at the bottom
+  (use-package which-key
+    :defer 0
+    :diminish  which-key-mode
+    :config
+    (which-key-mode)
+    (setq which-key-idle-delay 0.3))
 #+end_src
 
 #+begin_src emacs-lisp
-;; Better Ivy / counsel print with rows of additional data
-;; Generates a bunch of warning during install
-;; But seems works. Maybe latest gihub version would do better.
-(use-package ivy-rich
-  :init
-  (ivy-rich-mode 1))
+  ;; Better Ivy / counsel print with rows of additional data
+  ;; Generates a bunch of warning during install
+  ;; But seems works. Maybe latest gihub version would do better.
+  (use-package ivy-rich
+    :after ivy
+    :init
+    (ivy-rich-mode 1))
 #+end_src
 
 #+begin_src emacs-lisp
-;; Should provide extended help but it does not somehow
-(use-package helpful
-  :custom
-  (counsel-describe-function-funciton #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
-  :bind
-  ([remap describe-function] . counsel-describe-function)
-  ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
-  ([remap describe-key] .  helpful-key))
+  ;; Should provide extended help but it does not somehow
+  (use-package helpful
+    :commands (helpful-callable helpful-variable helpful-command helpful-key)
+    :custom
+    (counsel-describe-function-funciton #'helpful-callable)
+    (counsel-describe-variable-function #'helpful-variable)
+    :bind
+    ([remap describe-function] . counsel-describe-function)
+    ([remap describe-command] . helpful-command)
+    ([remap describe-variable] . counsel-describe-variable)
+    ([remap describe-key] .  helpful-key))
 #+end_src
 
 #+begin_src emacs-lisp
-;; Suff for key bindings
-(use-package general
-  :config
-  (general-evil-setup t)
-  (general-create-definer rune/leader-keys
-    :keymaps '(normal insrt visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-  
-  ;; Here bind some keys
-  (general-define-key
-   (kbd "<escape>") 'keyboard-escape-quit)
+  ;; Suff for key bindings
+  (use-package general
+    :after evil
+    :config
+    (general-evil-setup t)
+    (general-create-definer rune/leader-keys
+      :keymaps '(normal insrt visual emacs)
+      :prefix "SPC"
+      :global-prefix "C-SPC")
 
-  (rune/leader-keys
-    "t" '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose-theme")))
+    ;; Here bind some keys
+    (general-define-key
+     (kbd "<escape>") 'keyboard-escape-quit)
+
+    (rune/leader-keys
+      "t" '(:ignore t :which-key "toggles")
+      "tt" '(counsel-load-theme :which-key "choose-theme")))
 
 #+end_src
 
@@ -283,16 +291,17 @@ Some reverts
 
 * Hydra stuff
 #+begin_src emacs-lisp
-(use-package hydra)
+  (use-package hydra
+    :defer t)
 
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
-  ("f" nil "finished" :exit t))
+  (defhydra hydra-text-scale (:timeout 4)
+    "scale text"
+    ("j" text-scale-increase "in")
+    ("k" text-scale-decrease "out")
+    ("f" nil "finished" :exit t))
 
-(rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
+  (rune/leader-keys
+    "ts" '(hydra-text-scale/body :which-key "scale text"))
 #+end_src
 * Projects
 #+begin_src emacs-lisp
@@ -346,14 +355,15 @@ Some reverts
 ** Languages
 
 #+begin_src emacs-lisp
-(require 'org-tempo)
+  (with-eval-after-load 'org
+    (require 'org-tempo)
 
-(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-(add-to-list 'org-structure-template-alist '("py" . "src python"))
-(add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
-(add-to-list 'org-structure-template-alist '("jl" . "src julia"))
-(add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
+    (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+    (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+    (add-to-list 'org-structure-template-alist '("py" . "src python"))
+    (add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
+    (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
+    (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia")))
 #+end_src
 #+begin_src emacs-lisp
 (defun my/org-confirm-babel-evaluate (lang body)
@@ -413,33 +423,29 @@ Some reverts
 
 # Commented out
 #+begin_src emacs-lisp
-(use-package lsp-ivy)
+  (use-package lsp-ivy)
 #+end_src
 *** Jupyter
 #+begin_src emacs-lisp
   (use-package jupyter)
-  ;; (require 'jupyter)
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package ein) 
+  (use-package ein) 
 #+end_src
 
 #+begin_src emacs-lisp
-(org-babel-do-load-languages
- 'org-babel-load-languages
- '((emacs-lisp . t)
-   (julia . t)
-   (python . t)
-   (ein . t)
-   (jupyter . t)
-   ))
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((emacs-lisp . t)
+       (julia . t)
+       (python . t)
+       (ein . t)
+       (jupyter . t)
+       ))
+    (push '("conf-unix" . conf-unix) org-src-lang-modes) )
 #+end_src
-Writing config files with babel
-#+begin_src emacs-lisp
-(push '("conf-unix" . conf-unix) org-src-lang-modes) 
-#+end_src
-
 
 *** Completion
 #+begin_src emacs-lisp
