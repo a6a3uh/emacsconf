@@ -16,3 +16,4 @@ transient/
 /.org-id-locations
 /elpa-bak/
 /straight/
+/org-persist/

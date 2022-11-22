@@ -22,8 +22,8 @@
 (cl-case system-type
       ('gnu/linux (setq yadisk-path "~/yadisk"
                           org-path "~/org"))
-      ('windows-nt (setq yadisk-path "~/yadisk"
-                           org-path "~/yadisk/org"))
+      ('windows-nt (setq yadisk-path "~/YandexDisk"
+                           org-path "~/YandexDisk/org"))
       )
 
 (setq inhibit-startup-message t)
