@@ -89,6 +89,12 @@
   :config
   (ivy-mode 1))
 
+(use-package ivy-prescient
+  :after counsel
+  :config
+  (ivy-prescient-mode 1)
+  (prescient-persist-mode 1))
+
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
          ("C-x b" . counsel-ibuffer)
@@ -224,9 +230,10 @@
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
 
-(use-package direnv
- :config
- (direnv-mode))
+(when (equal system-type 'gnu/linux)
+  (use-package direnv
+     :config
+     (direnv-mode)))
 
 (use-package magit
   :custom

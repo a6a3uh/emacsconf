@@ -124,6 +124,13 @@ Some reverts
   (ivy-mode 1))
 #+end_src
 
+#+begin_src emacs-lisp
+    (use-package ivy-prescient
+      :after counsel
+      :config
+      (ivy-prescient-mode 1)
+      (prescient-persist-mode 1))
+#+end_src
 * Advanced UI
 # Does not works, no tangling #TODO
 #+begin_src emacs-lisp :tangle no
@@ -304,9 +311,10 @@ Some reverts
 #+end_src
 * Files / folders
 #+begin_src emacs-lisp
+(when (equal system-type 'gnu/linux)
   (use-package direnv
-   :config
-   (direnv-mode))
+     :config
+     (direnv-mode)))
 #+end_src
 * Git
 #+begin_src emacs-lisp
