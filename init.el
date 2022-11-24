@@ -285,16 +285,6 @@
 	org-hide-emphasis-markers t
 	org-src-fontify-natively t))
 
-(with-eval-after-load 'org
-  (require 'org-tempo)
-
-  (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
-  (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
-  (add-to-list 'org-structure-template-alist '("py" . "src python"))
-  (add-to-list 'org-structure-template-alist '("jp" . "src jupyter-python"))
-  (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
-  (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia")))
-
 ;; Don't request confirm when evaluating certaing languages
 (defun my/org-confirm-babel-evaluate (lang body)
   (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
