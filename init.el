@@ -253,6 +253,10 @@
      :config
      (direnv-mode)))
 
+(use-package ranger
+  :straight t
+    :after dired)
+
 (use-package openwith)
 (openwith-mode t)
 (when (equal system-type 'windows-nt)

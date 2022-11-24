@@ -338,6 +338,12 @@ Some reverts
 #+end_src
 
 #+begin_src emacs-lisp
+  (use-package ranger
+    :straight t
+      :after dired)
+#+end_src
+
+#+begin_src emacs-lisp
   (use-package openwith)
   (openwith-mode t)
   (when (equal system-type 'windows-nt)
