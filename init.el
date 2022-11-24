@@ -350,6 +350,7 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
+     (latex . t)
      (julia . t)
      (python . t)
      (ein . t)
@@ -430,7 +431,7 @@
 (use-package djvu)
 
 (setq
-   org-startup-with-latex-preview t
+ org-startup-with-latex-preview t
 )
 
 (when (equal system-type 'gnu/linux)

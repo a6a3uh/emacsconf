@@ -476,6 +476,7 @@ Some reverts
     (org-babel-do-load-languages
      'org-babel-load-languages
      '((emacs-lisp . t)
+       (latex . t)
        (julia . t)
        (python . t)
        (ein . t)
@@ -579,22 +580,21 @@ Some reverts
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package org-ref)
+  (use-package org-ref)
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package org-roam-bibtex)
+  (use-package org-roam-bibtex)
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package djvu)
+  (use-package djvu)
 #+end_src
 
 #+begin_src emacs-lisp
   (setq
    org-startup-with-latex-preview t
-)
-
+  )
 #+end_src
 
 * Mail
