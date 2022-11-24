@@ -321,6 +321,9 @@
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 
+(use-package engrave-faces)
+(setq org-latex-src-block-backend 'engraved)
+
 (use-package julia-mode)
 ;; (require 'julia-mode)
 

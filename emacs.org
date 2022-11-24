@@ -423,6 +423,12 @@ Some reverts
           org-roam-ui-update-on-save t
           org-roam-ui-open-on-start t))
 #+end_src
+** LaTeX
+This is for coloring exported code using Emacs native code coloring
+#+begin_src emacs-lisp
+  (use-package engrave-faces)
+  (setq org-latex-src-block-backend 'engraved)
+#+end_src
 * Development
 ** Languages
 *** Python
