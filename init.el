@@ -22,11 +22,11 @@
   (exec-path-from-shell-initialize))
 
 (cl-case system-type
-      ('gnu/linux (setq yadisk-path "~/yadisk"
-                          org-path "~/org"))
-      ('windows-nt (setq yadisk-path "~/YandexDisk"
-                           org-path "~/YandexDisk/org"))
-      )
+  ('gnu/linux (setq yadisk-path "~/yadisk"
+                    org-path "~/org"))
+  ('windows-nt (setq yadisk-path "~/YandexDisk"
+                     org-path "~/YandexDisk/org"))
+  )
 
 (setq inhibit-startup-message t)
 
@@ -207,6 +207,16 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
+  ;; make pdf not blinking with cursos
+  ;; Does not works
+  ;; Turning off Blink Cursor minor mode helps though
+
+  ;; (evil-set-initial-state 'pdf-view-mode 'emacs)
+  ;; :hook
+  ;; (pdf-view-mode-hook . 
+   ;; (lambda ()
+     ;; (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))))
+
 (use-package evil-collection
   :after evil
   :config
@@ -226,7 +236,7 @@
 
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode)
+  :config (projectile-mode +1)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map)
@@ -242,6 +252,13 @@
   (use-package direnv
      :config
      (direnv-mode)))
+
+(use-package openwith)
+(openwith-mode t)
+(when (equal system-type 'windows-nt)
+  (setq openwith-associations
+        '(("\\.pdf\\'" "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
+           (file)))))
 
 (use-package magit
   :custom
@@ -274,6 +291,7 @@
   (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
   (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia")))
 
+;; Don't request confirm when evaluating certaing languages
 (defun my/org-confirm-babel-evaluate (lang body)
   (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
 (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
@@ -284,6 +302,20 @@
   (let ((org-confirm-babel-evaluate nil))
     (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
+
+(use-package org-roam-ui
+  :straight
+  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :after org-roam
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;; :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
 
 (use-package julia-mode)
 ;; (require 'julia-mode)
@@ -355,7 +387,13 @@
 (use-package org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
 
-(use-package pdf-tools)
+(use-package pdf-tools
+  ;; Nothing of this kind helpes with pdf blurriness on Windows.
+  ;; :custom
+  ;; (pdf-view-use-scaling t)
+  ;; (doc-view-resolution 300)
+  ;; (pdf-view-use-imagemagick nil)
+  )
 
 (use-package org-roam
   :straight t
@@ -376,9 +414,9 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (citar-bibliography '(concat yadisk-path "/phd/phd.bib"))
-  (citar-library-paths '(concat yadisk-path "/phd/papers"))
-  (citar-notes-paths '(concat org-path "/roam/references"))
+  (citar-bibliography (list (concat yadisk-path "/phd/phd.bib")))
+  (citar-library-paths (list (concat yadisk-path "/phd/papers")))
+  (citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)

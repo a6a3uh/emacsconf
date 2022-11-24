@@ -28,18 +28,18 @@
 #+end_src
 * Env Variables
 #+begin_src emacs-lisp
-(use-package exec-path-from-shell)
-(when (memq window-system '(mac ns x))
-  (exec-path-from-shell-initialize))
+  (use-package exec-path-from-shell)
+  (when (memq window-system '(mac ns x))
+    (exec-path-from-shell-initialize))
 #+end_src
 
 #+begin_src emacs-lisp
   (cl-case system-type
-        ('gnu/linux (setq yadisk-path "~/yadisk"
-                            org-path "~/org"))
-        ('windows-nt (setq yadisk-path "~/YandexDisk"
-                             org-path "~/YandexDisk/org"))
-        )
+    ('gnu/linux (setq yadisk-path "~/yadisk"
+                      org-path "~/org"))
+    ('windows-nt (setq yadisk-path "~/YandexDisk"
+                       org-path "~/YandexDisk/org"))
+    )
 #+end_src
 * Basic UI Configuration
 ** Basics
@@ -261,32 +261,42 @@ Some reverts
 #+end_src
 * Evil
 #+begin_src emacs-lisp
-;; Good mode with bad name
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-want-C-u-scroll t)
-  (setq evil-want-C-i-jump  nil)
-  :config
-  (evil-mode 1)
-  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  ;; Good mode with bad name
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump  nil)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-  ;; Use visual line motions even outside of visual-line-mode buffers
-  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-  ;; Make ESC quit prompts
-  (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+    ;; Make ESC quit prompts
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-  (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal))
 
-(use-package evil-collection
-  :after evil
-  :config
-  (evil-collection-init))
+    ;; make pdf not blinking with cursos
+    ;; Does not works
+    ;; Turning off Blink Cursor minor mode helps though
+  
+    ;; (evil-set-initial-state 'pdf-view-mode 'emacs)
+    ;; :hook
+    ;; (pdf-view-mode-hook . 
+     ;; (lambda ()
+       ;; (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))))
+
+  (use-package evil-collection
+    :after evil
+    :config
+    (evil-collection-init))
 #+end_src
 
 * Hydra stuff
@@ -307,7 +317,7 @@ Some reverts
 #+begin_src emacs-lisp
 (use-package projectile
   :diminish projectile-mode
-  :config (projectile-mode)
+  :config (projectile-mode +1)
   :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map)
@@ -325,6 +335,15 @@ Some reverts
   (use-package direnv
      :config
      (direnv-mode)))
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package openwith)
+  (openwith-mode t)
+  (when (equal system-type 'windows-nt)
+    (setq openwith-associations
+          '(("\\.pdf\\'" "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
+             (file)))))
 #+end_src
 * Git
 #+begin_src emacs-lisp
@@ -365,10 +384,12 @@ Some reverts
     (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
     (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia")))
 #+end_src
+
 #+begin_src emacs-lisp
-(defun my/org-confirm-babel-evaluate (lang body)
-  (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
-(setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
+  ;; Don't request confirm when evaluating certaing languages
+  (defun my/org-confirm-babel-evaluate (lang body)
+    (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia"))))
+  (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 #+end_src
 ** Auto tangle
 #+begin_src emacs-lisp
@@ -380,6 +401,22 @@ Some reverts
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 #+end_src
 
+** Roam
+#+begin_src emacs-lisp
+  (use-package org-roam-ui
+    :straight
+    (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+    :after org-roam
+    ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+    ;;         a hookable mode anymore, you're advised to pick something yourself
+    ;;         if you don't care about startup time, use
+    ;; :hook (after-init . org-roam-ui-mode)
+    :config
+    (setq org-roam-ui-sync-theme t
+          org-roam-ui-follow t
+          org-roam-ui-update-on-save t
+          org-roam-ui-open-on-start t))
+#+end_src
 * Development
 ** Languages
 *** Python
@@ -500,7 +537,13 @@ Some reverts
 #+end_src
 
 #+begin_src emacs-lisp
-(use-package pdf-tools)
+  (use-package pdf-tools
+    ;; Nothing of this kind helpes with pdf blurriness on Windows.
+    ;; :custom
+    ;; (pdf-view-use-scaling t)
+    ;; (doc-view-resolution 300)
+    ;; (pdf-view-use-imagemagick nil)
+    )
 #+end_src
 
 #+begin_src emacs-lisp
@@ -525,9 +568,9 @@ Some reverts
            :map minibuffer-local-map
            ("M-b" . citar-insert-preset))
     :custom
-    (citar-bibliography '(concat yadisk-path "/phd/phd.bib"))
-    (citar-library-paths '(concat yadisk-path "/phd/papers"))
-    (citar-notes-paths '(concat org-path "/roam/references"))
+    (citar-bibliography (list (concat yadisk-path "/phd/phd.bib")))
+    (citar-library-paths (list (concat yadisk-path "/phd/papers")))
+    (citar-notes-paths (list (concat org-path "/roam/references")))
     (citar-file-extensions '("pdf" "org" "md"))
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
