@@ -131,7 +131,7 @@
 (use-package helpful
   :commands (helpful-callable helpful-variable helpful-command helpful-key)
   :custom
-  (counsel-describe-function-funciton #'helpful-callable)
+  (counsel-describe-function-function #'helpful-callable)
   (counsel-describe-variable-function #'helpful-variable)
   :bind
   ([remap describe-function] . counsel-describe-function)
