@@ -207,16 +207,6 @@
   (evil-set-initial-state 'messages-buffer-mode 'normal)
   (evil-set-initial-state 'dashboard-mode 'normal))
 
-  ;; make pdf not blinking with cursos
-  ;; Does not works
-  ;; Turning off Blink Cursor minor mode helps though
-
-  ;; (evil-set-initial-state 'pdf-view-mode 'emacs)
-  ;; :hook
-  ;; (pdf-view-mode-hook . 
-   ;; (lambda ()
-     ;; (set (make-local-variable 'evil-emacs-state-cursor) (list nil)))))
-
 (use-package evil-collection
   :after evil
   :config
@@ -386,12 +376,10 @@
 (add-hook 'org-mode-hook 'org-fragtog-mode)
 
 (use-package pdf-tools
-  ;; Nothing of this kind helpes with pdf blurriness on Windows.
-  ;; :custom
-  ;; (pdf-view-use-scaling t)
-  ;; (doc-view-resolution 300)
-  ;; (pdf-view-use-imagemagick nil)
+  :config
+  (pdf-tools-install)
   )
+(add-hook 'pdf-view-mode-hook (blink-cursor-mode -1))
 
 (use-package org-roam
   :straight t
