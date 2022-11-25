@@ -28,6 +28,8 @@
                      org-path "~/YandexDisk/org"))
   )
 
+(setq my/bib-files (list (concat yadisk-path "/phd/phd.bib")))
+
 (setq inhibit-startup-message t)
 
 (menu-bar-mode -1)   ;; Disable menu bar
@@ -400,13 +402,16 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (citar-bibliography (list (concat yadisk-path "/phd/phd.bib")))
+  (citar-bibliography my/bib-files)
   (citar-library-paths (list (concat yadisk-path "/phd/papers")))
   (citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
+  (org-cite-export-processors '((latex biblatex) (t csl)))
+  (org-support-shift-select t)
+  (org-cite-global-bibliography my/bib-files)
   )
 
 (use-package org-ref)
