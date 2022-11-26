@@ -199,8 +199,9 @@ Some reverts
       "t" '(:ignore t :which-key "toggles")
       "tt" '(consult-theme :which-key "choose-theme")
       "f" '(:ignore t :which-key "files")
-      "fr" '(consult-recent-file :which-key "recent files")
+      "ff" '(consult-recent-file :which-key "recent files")
       "fd" '(dired :which-key "dired")
+      "fr" '(ranger :which-key "ranger")
       "w" '(ace-window :which-key "windows")))
 
 #+end_src
@@ -270,29 +271,31 @@ Some reverts
 #+end_src
 * Evil
 #+begin_src emacs-lisp
-  ;; Good mode with bad name
-  (use-package evil
-    :init
-    (setq evil-want-integration t)
-    (setq evil-want-keybinding nil)
-    (setq evil-want-C-u-scroll t)
-    (setq evil-want-C-i-jump  nil)
-    :config
-    (evil-mode 1)
-    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+    ;; Good mode with bad name
+    (use-package evil
+      :init
+      (setq evil-want-integration t)
+      (setq evil-want-keybinding nil)
+      (setq evil-want-C-u-scroll t)
+      (setq evil-want-C-i-jump  nil)
+      :config
+      (evil-mode 1)
+      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-    ;; Use visual line motions even outside of visual-line-mode buffers
-    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+      ;; Use visual line motions even outside of visual-line-mode buffers
+      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-    ;; Make ESC quit prompts
-    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+      ;; Make ESC quit prompts
+      (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-    (evil-set-initial-state 'messages-buffer-mode 'normal)
-    (evil-set-initial-state 'dashboard-mode 'normal)
-    ;; Turn off unused stuff to release C-. for embark
-    (define-key evil-normal-state-map (kbd "C-.") nil))
+      (evil-set-initial-state 'messages-buffer-mode 'normal)
+      (evil-set-initial-state 'dashboard-mode 'normal)
+      ;; Turn off unused stuff to release C-. for embark
+      (define-key evil-normal-state-map (kbd "C-.") nil)
+      (define-key evil-normal-state-map (kbd "M-.") nil)
+      )
 #+end_src
 
 #+begin_src emacs-lisp
@@ -376,7 +379,7 @@ Some reverts
   :hook (org-mode . my/org-mode-setup)
   :config
   (setq org-ellipsis " ▾"
-	org-hide-emphasis-markers t
+	;; org-hide-emphasis-markers t
 	org-src-fontify-natively t))
 #+end_src
 ** Languages
