@@ -196,6 +196,7 @@ Some reverts
      (kbd "<escape>") 'keyboard-escape-quit)
 
     (rune/leader-keys
+      "g" '(magit :which-key "magit")
       "t" '(:ignore t :which-key "toggles")
       "tt" '(consult-theme :which-key "choose-theme")
       "f" '(:ignore t :which-key "files")
@@ -363,6 +364,14 @@ Some reverts
     (setq openwith-associations
           '(("\\.pdf\\'" "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
              (file)))))
+#+end_src
+
+#+begin_src emacs-lisp
+  (add-hook 'dired-mode-hook
+            (lambda ()
+              (dired-hide-details-mode)
+              ;; (dired-sort-toggle-or-edit)
+              ))
 #+end_src
 * Git
 #+begin_src emacs-lisp
