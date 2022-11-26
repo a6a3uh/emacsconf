@@ -271,31 +271,39 @@ Some reverts
 #+end_src
 * Evil
 #+begin_src emacs-lisp
-    ;; Good mode with bad name
-    (use-package evil
-      :init
-      (setq evil-want-integration t)
-      (setq evil-want-keybinding nil)
-      (setq evil-want-C-u-scroll t)
-      (setq evil-want-C-i-jump  nil)
-      :config
-      (evil-mode 1)
-      (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
-      (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+  (use-package undo-tree
+    :init
+    (global-undo-tree-mode))
+#+end_src
 
-      ;; Use visual line motions even outside of visual-line-mode buffers
-      (evil-global-set-key 'motion "j" 'evil-next-visual-line)
-      (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+#+begin_src emacs-lisp
+  ;; Good mode with bad name
+  (use-package evil
+    :init
+    (setq evil-want-integration t)
+    (setq evil-want-keybinding nil)
+    (setq evil-want-C-u-scroll t)
+    (setq evil-want-C-i-jump  nil)
+    :config
+    (evil-mode 1)
+    (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+    (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
 
-      ;; Make ESC quit prompts
-      (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+    ;; Use visual line motions even outside of visual-line-mode buffers
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
 
-      (evil-set-initial-state 'messages-buffer-mode 'normal)
-      (evil-set-initial-state 'dashboard-mode 'normal)
-      ;; Turn off unused stuff to release C-. for embark
-      (define-key evil-normal-state-map (kbd "C-.") nil)
-      (define-key evil-normal-state-map (kbd "M-.") nil)
-      )
+    ;; Make ESC quit prompts
+    (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
+
+    (evil-set-initial-state 'messages-buffer-mode 'normal)
+    (evil-set-initial-state 'dashboard-mode 'normal)
+
+    (evil-set-undo-system 'undo-tree)
+    ;; Turn off unused stuff to release C-. for embark
+    (define-key evil-normal-state-map (kbd "C-.") nil)
+    (define-key evil-normal-state-map (kbd "M-.") nil)
+    )
 #+end_src
 
 #+begin_src emacs-lisp
