@@ -205,7 +205,9 @@
   (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
   (evil-set-initial-state 'messages-buffer-mode 'normal)
-  (evil-set-initial-state 'dashboard-mode 'normal))
+  (evil-set-initial-state 'dashboard-mode 'normal)
+  ;; Turn off unused stuff to release C-. for embark
+  (define-key evil-normal-state-map (kbd "C-.") nil))
 
 (use-package evil-collection
   :after evil
