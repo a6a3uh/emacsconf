@@ -215,7 +215,9 @@ Some reverts
     ("M-y" 'consult-yank-from-kill-ring
      "C-x b" 'consult-buffer))
 #+end_src
-
+#+begin_src emacs-lisp
+(use-package embark-consult)
+#+end_src
 #+begin_src emacs-lisp
   ;; Use `consult-completion-in-region' if Vertico is enabled.
   ;; Otherwise use the default `completion--in-region' function.
@@ -268,7 +270,9 @@ Some reverts
 #+end_src
 * Windows
 #+begin_src emacs-lisp
-  (use-package ace-window)
+  (use-package ace-window
+    :straight t)
+  (setq aw-dispatch-always t)
 #+end_src
 * Evil
 #+begin_src emacs-lisp
