@@ -74,40 +74,28 @@
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
 
-;; Autocompletion
-(use-package ivy
-  :diminish
-  :bind (("C-s" . swiper)
-	 :map ivy-minibuffer-map
-	 ("TAB" . ivy-alt-done)
-	 ("C-l" . ivy-alt-done)
-	 ("C-j" . ivy-next-line)
-	 ("C-k" . ivy-previous-line)
-	 :map ivy-switch-buffer-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-l" . ivy-done)
-	 ("C-d" . ivy-switch-buffer-kill)
-	 :map ivy-reverse-i-search-map
-	 ("C-k" . ivy-previous-line)
-	 ("C-d" . ivey-reverse-i-search-kill))
-  :config
-  (ivy-mode 1))
+(use-package vertico
+  :init
+  (vertico-mode +1))
 
-(use-package ivy-prescient
-  :after counsel
-  :config
-  (ivy-prescient-mode 1)
-  (prescient-persist-mode 1))
+(use-package orderless
+  :init
+  (setq completion-styles '(orderless)
+        completion-category-defaults nil
+        completion-category-overrides '((file (styles partial-comletion)))))
 
-(use-package counsel
-  :bind (("M-x" . counsel-M-x)
-         ("C-x b" . counsel-ibuffer)
-         ("C-x C-f" . counsel-find-file)
-         ("C-x C-r" . counsel-recentf)
-         :map minibuffer-local-map
-         ("C-r" . counsel-minibufer-history))
-  :config
-  (setq ivy-initial-inputs-alist nil)) ;; Don't start searches with ^
+;; to show additional columns of info
+(use-package marginalia
+  :config (marginalia-mode))
+
+(use-package embark
+  :straight t
+  :bind
+  (("C-." . embark-act)
+   ("M-." . embark-dwim)
+   ("C-h B" . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command))
 
 ;; parences rainbow highliht
 (use-package rainbow-delimiters
@@ -121,24 +109,13 @@
   (which-key-mode)
   (setq which-key-idle-delay 0.3))
 
-;; Better Ivy / counsel print with rows of additional data
-;; Generates a bunch of warning during install
-;; But seems works. Maybe latest gihub version would do better.
-(use-package ivy-rich
-  :after ivy
-  :init
-  (ivy-rich-mode 1))
-
 ;; Should provide extended help but it does not somehow
 (use-package helpful
   :commands (helpful-callable helpful-variable helpful-command helpful-key)
-  :custom
-  (counsel-describe-function-function #'helpful-callable)
-  (counsel-describe-variable-function #'helpful-variable)
   :bind
-  ([remap describe-function] . counsel-describe-function)
+  ([remap describe-function] . helpful-callable)
   ([remap describe-command] . helpful-command)
-  ([remap describe-variable] . counsel-describe-variable)
+  ([remap describe-variable] . helpful-variable)
   ([remap describe-key] .  helpful-key))
 
 ;; Suff for key bindings
@@ -157,7 +134,26 @@
 
   (rune/leader-keys
     "t" '(:ignore t :which-key "toggles")
-    "tt" '(counsel-load-theme :which-key "choose-theme")))
+    "tt" '(consult-theme :which-key "choose-theme")
+    "f" '(:ignore t :which-key "files")
+    "fr" '(consult-recent-file :which-key "recent files")
+    "fd" '(dired :which-key "dired")
+    "w" '(ace-window :which-key "windows")))
+
+;; Previews stuff and plays nicely with vertico or similar
+(use-package consult
+  :general
+  ("M-y" 'consult-yank-from-kill-ring
+   "C-x b" 'consult-buffer))
+
+;; Use `consult-completion-in-region' if Vertico is enabled.
+;; Otherwise use the default `completion--in-region' function.
+(setq completion-in-region-function
+      (lambda (&rest args)
+        (apply (if vertico-mode
+                   #'consult-completion-in-region
+                 #'completion--in-region)
+               args)))
 
 (use-package doom-modeline
   :straight t
@@ -186,6 +182,8 @@
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
+
+(use-package ace-window)
 
 ;; Good mode with bad name
 (use-package evil
@@ -229,7 +227,6 @@
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode +1)
-  :custom ((projectile-completion-system 'ivy))
   :bind-keymap
   ("C-c p" . projectile-command-map)
   :init
@@ -237,8 +234,8 @@
     (setq projectile-project-search-project-path '("~/code")))
   (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package counsel-projectile
-  :config (counsel-projectile-mode))
+(use-package consult-projectile
+  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 
 (when (equal system-type 'gnu/linux)
   (use-package direnv
@@ -248,13 +245,6 @@
 (use-package ranger
   :straight t
     :after dired)
-
-(use-package openwith)
-(openwith-mode t)
-(when (equal system-type 'windows-nt)
-  (setq openwith-associations
-        '(("\\.pdf\\'" "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
-           (file)))))
 
 (use-package magit
   :custom
@@ -329,7 +319,7 @@
 
 (use-package lsp-ui)
 
-(use-package lsp-ivy)
+(use-package consult-lsp)
 
 (use-package jupyter)
 
