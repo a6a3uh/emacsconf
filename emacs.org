@@ -199,10 +199,12 @@ Some reverts
       "g" '(magit :which-key "magit")
       "t" '(:ignore t :which-key "toggles")
       "tt" '(consult-theme :which-key "choose-theme")
+      "tz" '(writeroom-mode :which-key "zen mode")
       "f" '(:ignore t :which-key "files")
       "ff" '(consult-recent-file :which-key "recent files")
       "fd" '(dired :which-key "dired")
       "fr" '(ranger :which-key "ranger")
+      "tn" '(display-line-numbers-mode :which-key "line numbers")
       "w" '(ace-window :which-key "windows")))
 
 #+end_src
@@ -273,6 +275,9 @@ Some reverts
   (use-package ace-window
     :straight t)
   (setq aw-dispatch-always t)
+#+end_src
+#+begin_src emacs-lisp
+(use-package writeroom-mode)
 #+end_src
 * Evil
 #+begin_src emacs-lisp
