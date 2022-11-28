@@ -366,15 +366,6 @@ Some reverts
       :after dired)
 #+end_src
 
-#+begin_src emacs-lisp :tangle no
-  (use-package openwith)
-  (openwith-mode t)
-  (when (equal system-type 'windows-nt)
-    (setq openwith-associations
-          '(("\\.pdf\\'" "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
-             (file)))))
-#+end_src
-
 #+begin_src emacs-lisp
   (add-hook 'dired-mode-hook
             (lambda ()
@@ -527,7 +518,7 @@ This is for coloring exported code using Emacs native code coloring
 #+end_src
 
 *** Completion
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
   (use-package company
     :after lsp-mode
     :hook (lsp-mode . company-mode)
