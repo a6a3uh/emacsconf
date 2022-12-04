@@ -85,7 +85,6 @@ Custom variables
   (setq custom-file (locate-user-emacs-file "custom-vars.el"))
 
   (load custom-file 'noerror 'nomessage)
-
 #+end_src
 
 Some reverts
@@ -104,10 +103,9 @@ Some reverts
 ** Font Configuration
 
 #+begin_src emacs-lisp
-(set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
-(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
-
+  (set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
+  (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
 #+end_src
 
 * Autocompletion
@@ -218,7 +216,7 @@ Some reverts
      "C-x b" 'consult-buffer))
 #+end_src
 #+begin_src emacs-lisp
-(use-package embark-consult)
+  (use-package embark-consult)
 #+end_src
 #+begin_src emacs-lisp
   ;; Use `consult-completion-in-region' if Vertico is enabled.
@@ -378,9 +376,6 @@ Some reverts
 (use-package magit
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
-
-;; This is to login to GitHub and work with issues etc
-;;(use-package forge)
 #+end_src
 
 * Org mode
@@ -422,10 +417,6 @@ Some reverts
     :straight
     (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
     :after org-roam
-    ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-    ;;         a hookable mode anymore, you're advised to pick something yourself
-    ;;         if you don't care about startup time, use
-    ;; :hook (after-init . org-roam-ui-mode)
     :config
     (setq org-roam-ui-sync-theme t
           org-roam-ui-follow t
@@ -457,43 +448,30 @@ This is for coloring exported code using Emacs native code coloring
 *** Julia
 #+begin_src emacs-lisp
   (use-package julia-mode)
-  ;; (require 'julia-mode)
-#+end_src
-
-#+begin_src emacs-lisp
-  (use-package lsp-julia)
 #+end_src
 
 #+begin_src emacs-lisp
   (use-package  julia-repl)
   (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
-  (add-hook 'julia-mode-hook #'lsp-mode)
-  ;; (add-hook 'julia-mode-hook (setq-local lsp-enable-folding t
-  ;;                                        lsp-folding-range-limit 100))
+  (add-hook 'julia-mode-hook 'company-mode)
+  (add-hook 'julia-mode-hook 'company-quickhelp-mode)
+  (add-hook 'julia-mode-hook 'eglot-jl-init)
+  (add-hook 'julia-mode-hook 'eglot-ensure)
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package eglot-jl)
 #+end_src
 
 *** Haskell
 *** Language Servers
 #+begin_src emacs-lisp
-  (use-package lsp-mode
-    :commands (lsp lsp-deferred)
-    :init
-    (setq lsp-keymap-prefix "C-c l") ;; 'C-l', 's-l'
-    (setq lsp-prefer-flymake nil)
-    :config
-    (lsp-enable-which-key-integration t)
-    :hook
-    ((python-mode . lsp)))
+  (use-package eglot)
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package lsp-ui)
+  (use-package consult-eglot)
 #+end_src
-
-#+begin_src emacs-lisp
-(use-package consult-lsp)
-#+end_src
-
 *** Jupyter
 #+begin_src emacs-lisp
   (use-package jupyter)
@@ -521,12 +499,8 @@ This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
   (use-package company
     :straight t
-    :after lsp-mode
-    :hook (lsp-mode . company-mode)
     :bind (:map company-active-map
                 ("<tab>" . company-complete-selection))
-    (:map lsp-mode-map
-          ("<tab>" . company-indent-or-complete-common))
     :custom
     (company-minimum-prefix-length 1)
     (company-idle-delay 0.0))
@@ -537,19 +511,20 @@ This is for coloring exported code using Emacs native code coloring
   (use-package company-box
     :hook (company-mode . company-box-mode))
 #+end_src
-*** Treemacs
+
 #+begin_src emacs-lisp
-  (use-package lsp-treemacs
-    :after lsp)
+  (use-package company-quickhelp)
 #+end_src
 *** Commenting
 #+begin_src emacs-lisp
   (use-package evil-nerd-commenter
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
-*** Linting
+*** Tree-Sitter
 #+begin_src emacs-lisp
-  (use-package flycheck)
+  (use-package tree-sitter)
+  (use-package tree-sitter-langs)
+  (global-tree-sitter-mode)
 #+end_src
 * Terminal
 ** VTerm
