@@ -203,6 +203,8 @@ Some reverts
       "fd" '(dired :which-key "dired")
       "fr" '(ranger :which-key "ranger")
       "tn" '(display-line-numbers-mode :which-key "line numbers")
+      "p" '(consult-projectile :which-key "select projects")
+      "b" '(consult-buffer :which-key "select buffer")
       "w" '(ace-window :which-key "windows")))
 
 #+end_src
@@ -319,6 +321,11 @@ Some reverts
     :after evil
     :config
     (evil-collection-init))
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package evil-textobj-tree-sitter
+    :straight t)
 #+end_src
 
 * Hydra stuff
@@ -457,6 +464,7 @@ This is for coloring exported code using Emacs native code coloring
   (add-hook 'julia-mode-hook 'company-quickhelp-mode)
   (add-hook 'julia-mode-hook 'eglot-jl-init)
   (add-hook 'julia-mode-hook 'eglot-ensure)
+  (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -525,6 +533,15 @@ This is for coloring exported code using Emacs native code coloring
   (use-package tree-sitter)
   (use-package tree-sitter-langs)
   (global-tree-sitter-mode)
+#+end_src
+#+begin_src emacs-lisp
+  (use-package ts-fold
+    :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package ts-fold-indicators
+    :straight (ts-fold-indicators :type git :host github :repo "emacs-tree-sitter/ts-fold"))
 #+end_src
 * Terminal
 ** VTerm
