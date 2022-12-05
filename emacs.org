@@ -632,9 +632,11 @@ This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
   (setq
    org-startup-with-latex-preview t
-  )
+   )
 #+end_src
-
+#+begin_src emacs-lisp
+  (use-package org-noter)
+#+end_src
 * Spelling
 #+begin_src emacs-lisp :tangle no
   ;; (setq ispell-program-name "C:/msys64/mingw64/bin/aspell.exe")
@@ -708,3 +710,5 @@ This is for coloring exported code using Emacs native code coloring
       ;;
       ))
 #+end_src
+
+
