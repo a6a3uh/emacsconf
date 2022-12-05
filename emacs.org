@@ -205,6 +205,8 @@ Some reverts
       "tn" '(display-line-numbers-mode :which-key "line numbers")
       "p" '(consult-projectile :which-key "select projects")
       "b" '(consult-buffer :which-key "select buffer")
+      "s" '(:ignore t :which-key "search")
+      "sr" '(my/org-roam-rg-search :which-key "search roam files")
       "w" '(ace-window :which-key "windows")))
 
 #+end_src
@@ -217,6 +219,16 @@ Some reverts
     ("M-y" 'consult-yank-from-kill-ring
      "C-x b" 'consult-buffer))
 #+end_src
+
+#+begin_src emacs-lisp
+  (defun my/org-roam-rg-search ()
+    "Search org-roam directory using consult-ripgrep. With live-preview."
+    (interactive)
+    (let ((consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS"))
+      (consult-ripgrep org-roam-directory)))
+  (global-set-key (kbd "C-c rr") 'my/org-roam-rg-search)
+#+end_src
+
 #+begin_src emacs-lisp
   (use-package embark-consult)
 #+end_src
