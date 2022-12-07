@@ -460,6 +460,10 @@ This is for coloring exported code using Emacs native code coloring
   (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
 #+end_src
 
+** Remarks
+#+begin_src emacs-lisp
+  (use-package org-remark)
+#+end_src
 * Development
 ** Languages
 *** Python
