@@ -472,7 +472,7 @@ This is for coloring exported code using Emacs native code coloring
 ** Languages
 *** Python
 #+begin_src emacs-lisp
-  (defcustom python-shell-interpreter "python")
+  (custom-set-variables '(python-shell-interpreter "python"))
 #+end_src
 *** C/C++
 *** Julia
