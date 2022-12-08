@@ -477,6 +477,14 @@ This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
   (custom-set-variables '(python-shell-interpreter "ipython"))
 #+end_src
+
+#+begin_src emacs-lisp
+  ;; This does not works with dir-locals setting pyvenv
+  ;; as both try to ask simething in minibuffer
+  ;; and second question invocation breaks first one
+  ;; with complain about running minibuffer from minibuffer
+  ;; (add-hook 'python-mode-hook 'eglot-ensure)
+#+end_src
 *** C/C++
 *** Julia
 #+begin_src emacs-lisp
