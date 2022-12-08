@@ -464,9 +464,16 @@ This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
   (use-package org-remark)
 #+end_src
+** Images
+#+begin_src emacs-lisp
+  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+#+end_src
 * Development
 ** Languages
 *** Python
+#+begin_src emacs-lisp
+  (defcustom python-shell-interpreter "python")
+#+end_src
 *** C/C++
 *** Julia
 #+begin_src emacs-lisp
