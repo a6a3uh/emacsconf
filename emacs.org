@@ -472,7 +472,10 @@ This is for coloring exported code using Emacs native code coloring
 ** Languages
 *** Python
 #+begin_src emacs-lisp
-  (custom-set-variables '(python-shell-interpreter "python"))
+  (use-package pyvenv)
+#+end_src
+#+begin_src emacs-lisp
+  (custom-set-variables '(python-shell-interpreter "ipython"))
 #+end_src
 *** C/C++
 *** Julia
