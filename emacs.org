@@ -109,18 +109,25 @@ Some reverts
 #+end_src
 
 * Autocompletion
+Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 #+begin_src emacs-lisp
   (use-package vertico
-    :init
-    (vertico-mode +1))
+    :custom
+    (vertico-count 13)                    ; Number of candidates to display
+    (vertico-resize t)
+    (vertico-cycle nil) ; Go from last to first candidate and first to last (cycle)?
+    :config
+    (vertico-mode))
 #+end_src
 
 #+begin_src emacs-lisp
   (use-package orderless
-    :init
-    (setq completion-styles '(orderless)
-          completion-category-defaults nil
-          completion-category-overrides '((file (styles partial-comletion)))))
+    :custom
+    (completion-styles '(orderless))      ; Use orderless
+    (completion-category-defaults nil)    ; I want to be in control!
+    (completion-category-overrides
+     '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+                     orderless)))))
 #+end_src
 
 #+begin_src emacs-lisp
@@ -129,6 +136,13 @@ Some reverts
     :config (marginalia-mode))
 #+end_src
 
+#+begin_src emacs-lisp
+  (use-package all-the-icons-completion
+    :after (marginalia all-the-icons)
+    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :init
+    (all-the-icons-completion-mode))
+#+end_src
 * Embark
 #+begin_src emacs-lisp
   (use-package embark
