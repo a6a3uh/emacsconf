@@ -462,6 +462,11 @@ This is for coloring exported code using Emacs native code coloring
   (use-package engrave-faces)
   (setq org-latex-src-block-backend 'engraved)
 #+end_src
+
+#+begin_src emacs-lisp
+  (require 'org)
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+#+end_src
 ** Templates
 #+begin_src emacs-lisp
   (require 'org-tempo)
