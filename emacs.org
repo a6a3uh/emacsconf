@@ -140,6 +140,7 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 (global-set-key (kbd "TAB") 'smart-tab)
 #+end_src
 
+This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter session for example. This will also desable Alt-TAB from switching windows releasing ot for completion function (on Windows only).
 #+begin_src emacs-lisp
 (define-key function-key-map [(control tab)] [?\M-\t])
 (when (fboundp 'w32-register-hot-key) (w32-register-hot-key [M-tab]))
