@@ -121,6 +121,31 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 #+end_src
 
 #+begin_src emacs-lisp
+;;function to implement a smarter TAB (EmacsWiki)
+(defun smart-tab ()
+  "This smart tab is minibuffer compliant: it acts as usual in
+    the minibuffer. Else, if mark is active, indents region. Else if
+    point is at the end of a symbol, expands it. Else indents the
+    current line."
+  (interactive)
+  (if (minibufferp)
+      (unless (minibuffer-complete)
+        (hippie-expand nil))
+    (if mark-active
+        (indent-region (region-beginning)
+                       (region-end))
+      (if (looking-at "\\_>")
+         (hippie-expand nil)
+        (indent-for-tab-command)))))
+(global-set-key (kbd "TAB") 'smart-tab)
+#+end_src
+
+#+begin_src emacs-lisp
+(define-key function-key-map [(control tab)] [?\M-\t])
+(when (fboundp 'w32-register-hot-key) (w32-register-hot-key [M-tab]))
+#+end_src
+
+#+begin_src emacs-lisp
   (use-package orderless
     :custom
     (completion-styles '(orderless))      ; Use orderless
