@@ -394,7 +394,9 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 #+begin_src emacs-lisp
   (use-package ranger
     :straight t
-      :after dired)
+    :after dired
+    :custom (ranger-show-hidden t)
+    )
 #+end_src
 
 #+begin_src emacs-lisp
