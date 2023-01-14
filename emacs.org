@@ -120,6 +120,8 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
     (vertico-mode))
 #+end_src
 
+This tab messes up with Julia Tab special symbols completion feature
+#+begin_comment
 #+begin_src emacs-lisp
 ;;function to implement a smarter TAB (EmacsWiki)
 (defun smart-tab ()
@@ -139,6 +141,7 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
         (indent-for-tab-command)))))
 (global-set-key (kbd "TAB") 'smart-tab)
 #+end_src
+#+end_comment
 
 #+begin_src emacs-lisp
 (define-key function-key-map [(control tab)] [?\M-\t])
