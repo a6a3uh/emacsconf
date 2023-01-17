@@ -462,7 +462,11 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
 #+begin_src emacs-lisp
   ;; Don't request confirm when evaluating certaing languages
   (defun my/org-confirm-babel-evaluate (lang body)
-    (not (or (string= lang "jupyter-python") (string= lang "jupyter-julia") (string= lang "emacs-lisp"))))
+    (not (or (string= lang "jupyter-python")
+             (string= lang "python")
+             (string= lang "julia")
+             (string= lang "jupyter-julia")
+             (string= lang "emacs-lisp"))))
   (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 #+end_src
 ** Auto tangle
