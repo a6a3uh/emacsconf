@@ -45,6 +45,12 @@
 #+begin_src emacs-lisp
     (setq my/bib-files (list (concat yadisk-path "/phd/phd.bib")))
 #+end_src
+* Coding
+#+begin_src emacs-lisp
+  (setq-default buffer-file-coding-system 'utf-8)
+  (setq-default coding-system-for-read 'utf-8)
+  (prefer-coding-system 'utf-8)
+#+end_src
 * Basic UI Configuration
 ** Basics
 Some toggles
