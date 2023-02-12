@@ -452,6 +452,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
 #+begin_src emacs-lisp
   (defun my/org-mode-setup ()
     (org-indent-mode)
+    (valign-mode)
     ;; (variable-pitch-mode 1)
     ;; (auto-fill-mode 0)
     (visual-line-mode 1)
@@ -529,6 +530,10 @@ This is for coloring exported code using Emacs native code coloring
 ** Images
 #+begin_src emacs-lisp
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+#+end_src
+** Tables
+#+begin_src emacs-lisp
+  (use-package valign)
 #+end_src
 * Development
 ** Languages
