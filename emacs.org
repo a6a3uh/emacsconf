@@ -36,9 +36,11 @@
 #+begin_src emacs-lisp
   (cl-case system-type
     ('gnu/linux (setq yadisk-path "~/yadisk"
-                      org-path "~/org"))
+                      org-path "~/org"
+                      root-path "~/miniconda3/envs/root_env"))
     ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
-                       org-path (concat (getenv "USERPROFILE") "/YandexDisk/org")))
+                       org-path (concat (getenv "USERPROFILE") "/YandexDisk/org")
+                       root-path "C:\\root_v6.28.00"))
     )
 #+end_src
 
@@ -478,6 +480,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
              (string= lang "julia")
              (string= lang "jupyter-julia")
              (string= lang "C++")
+             ;(string= lang "root")
              (string= lang "emacs-lisp"))))
   (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 #+end_src
@@ -525,6 +528,7 @@ This is for coloring exported code using Emacs native code coloring
   (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
   (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
+  ;(add-to-list 'org-structure-template-alist '("root" . "src root"))
 #+end_src
 
 ** Remarks
@@ -557,6 +561,17 @@ This is for coloring exported code using Emacs native code coloring
   ;; (add-hook 'python-mode-hook 'eglot-ensure)
 #+end_src
 *** C/C++
+#+begin_src emacs-lisp
+  (use-package cern-root-mode
+    :bind (:map c++-mode-map
+               (("C-c C-c" . cern-root-eval-defun)
+                ("C-c C-b" . cern-root-eval-buffer)
+                ("C-c C-l" . cern-root-eval-file)
+                ("C-c C-r" . cern-root-eval-region)))
+    :straight (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
+    :config
+    (setq cern-root-filepath root-path))
+#+end_src
 *** Julia
 #+begin_src emacs-lisp
   (use-package julia-mode)
@@ -604,6 +619,7 @@ This is for coloring exported code using Emacs native code coloring
        (python . t)
        ;; (ein . t)
        (C . t)
+       ;(root . t)
        (jupyter . t)
        ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes) )
