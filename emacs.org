@@ -40,7 +40,7 @@
                       root-path "~/miniconda3/envs/root_env/bin/root"))
     ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
                        org-path (concat (getenv "USERPROFILE") "/YandexDisk/org")
-                       root-path "C:\\root_v6.28.00\\bin\\root"))
+                       root-path "C:\\root_v6.28.00\\bin\\root.exe"))
     )
 #+end_src
 
