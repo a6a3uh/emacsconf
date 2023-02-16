@@ -37,10 +37,10 @@
   (cl-case system-type
     ('gnu/linux (setq yadisk-path "~/yadisk"
                       org-path "~/org"
-                      root-path "~/miniconda3/envs/root_env"))
+                      root-path "~/miniconda3/envs/root_env/bin/root"))
     ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
                        org-path (concat (getenv "USERPROFILE") "/YandexDisk/org")
-                       root-path "C:\\root_v6.28.00"))
+                       root-path "C:\\root_v6.28.00\\bin\\root"))
     )
 #+end_src
 
