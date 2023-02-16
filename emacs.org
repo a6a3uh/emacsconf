@@ -480,7 +480,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
              (string= lang "julia")
              (string= lang "jupyter-julia")
              (string= lang "C++")
-             ;(string= lang "root")
+             ;(string= lang "cern-root")
              (string= lang "emacs-lisp"))))
   (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 #+end_src
@@ -528,7 +528,7 @@ This is for coloring exported code using Emacs native code coloring
   (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
   (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
-  ;(add-to-list 'org-structure-template-alist '("root" . "src root"))
+  ;(add-to-list 'org-structure-template-alist '("root" . "src cern-root"))
 #+end_src
 
 ** Remarks
@@ -619,7 +619,7 @@ This is for coloring exported code using Emacs native code coloring
        (python . t)
        ;; (ein . t)
        (C . t)
-       ;(root . t)
+       ;(cern-root . t)
        (jupyter . t)
        ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes) )
