@@ -35,13 +35,12 @@
 
 #+begin_src emacs-lisp
   (cl-case system-type
-    ('gnu/linux (setq yadisk-path "~/yadisk"
+    ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
                       org-path "~/org"
-                      root-path "~/miniconda3/envs/root_env/bin/root"))
+                      root-path "/snap/bin/root"))
     ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
-                       org-path (concat (getenv "USERPROFILE") "/YandexDisk/org")
+                       org-path yadisk-path "/org")
                        root-path "C:\\root_v6.28.00\\bin\\root.exe"))
-    )
 #+end_src
 
 #+begin_src emacs-lisp
@@ -480,7 +479,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
              (string= lang "julia")
              (string= lang "jupyter-julia")
              (string= lang "C++")
-             ;(string= lang "cern-root")
+             (string= lang "cern-root")
              (string= lang "emacs-lisp"))))
   (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 #+end_src
@@ -528,7 +527,7 @@ This is for coloring exported code using Emacs native code coloring
   (add-to-list 'org-structure-template-alist '("jl" . "src julia"))
   (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
   (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
-  ;(add-to-list 'org-structure-template-alist '("root" . "src cern-root"))
+  (add-to-list 'org-structure-template-alist '("root" . "src cern-root"))
 #+end_src
 
 ** Remarks
@@ -563,6 +562,7 @@ This is for coloring exported code using Emacs native code coloring
 *** C/C++
 #+begin_src emacs-lisp
   (use-package cern-root-mode
+    :after org
     :bind (:map c++-mode-map
                (("C-c C-c" . cern-root-eval-defun)
                 ("C-c C-b" . cern-root-eval-buffer)
@@ -571,6 +571,7 @@ This is for coloring exported code using Emacs native code coloring
     :straight (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
     :config
     (setq cern-root-filepath root-path))
+    ;(require 'cern-root-mode)
 #+end_src
 *** Julia
 #+begin_src emacs-lisp
@@ -619,7 +620,6 @@ This is for coloring exported code using Emacs native code coloring
        (python . t)
        ;; (ein . t)
        (C . t)
-       ;(cern-root . t)
        (jupyter . t)
        ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes) )
