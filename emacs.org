@@ -593,13 +593,45 @@ This is for coloring exported code using Emacs native code coloring
 #+end_src
 
 *** Haskell
-*** Language Servers
+
+*** Templating
 #+begin_src emacs-lisp
-  (use-package eglot)
+  (use-package yasnippet)
+#+end_src
+*** Language Servers
+**** Eglot
+#+begin_src emacs-lisp
+  ;; (use-package eglot)
 #+end_src
 
 #+begin_src emacs-lisp
-  (use-package consult-eglot)
+  ;; (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
+  ;; (add-hook 'c-mode-hook 'eglot-ensure)
+  ;; (add-hook 'c++-mode-hook 'eglot-ensure)
+#+end_src
+
+#+begin_src emacs-lisp
+  ;; (use-package consult-eglot)
+#+end_src
+**** LSP
+#+begin_src emacs-lisp
+  (use-package lsp-mode)
+  (use-package dap-mode)
+#+end_src
+
+#+begin_src emacs-lisp
+  (which-key-mode)
+  (add-hook 'c-mode-hook 'lsp)
+  (add-hook 'c++-mode-hook 'lsp)
+
+  (with-eval-after-load 'lsp-mode
+    (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+    (require 'dap-cpptools)
+    (yas-global-mode))
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package consult-lsp)
 #+end_src
 *** Jupyter
 #+begin_src emacs-lisp
