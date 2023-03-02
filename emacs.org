@@ -592,6 +592,9 @@ This is for coloring exported code using Emacs native code coloring
   (use-package eglot-jl)
 #+end_src
 
+#+begin_src emacs-lisp
+  (use-package ess)
+#+end_src
 *** Haskell
 
 *** Templating
