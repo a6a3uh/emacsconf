@@ -25,9 +25,9 @@
   ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
                     org-path "~/org"
                     root-path "/snap/bin/root"))
-  ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
-                     org-path yadisk-path "/org")
-                     root-path "C:\\root_v6.28.00\\bin\\root.exe"))
+  ('windows-nt (setq yadisk-path "Z:"
+                     org-path (concat yadisk-path "/org")
+                     root-path "C:\\root_v6.28.00\\bin\\root.exe")))
 
 (setq my/bib-files (list (concat yadisk-path "/phd/phd.bib")))
 
@@ -449,8 +449,7 @@
 
 (use-package consult-lsp)
 
-(use-package jupyter
-    :straight (jupyter :type git :host github :repo "a6a3uh/emacs-jupyter"))
+(use-package jupyter)
 
 (use-package ein)
 

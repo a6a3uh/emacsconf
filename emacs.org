@@ -1,6 +1,6 @@
 #+title Emacs configuration
 #+property: header-args:emacs-lisp :tangle ./init.el :mkdirp yes :results none
- 
+
 * Package management
 #+begin_src emacs-lisp
   (defvar bootstrap-version)
@@ -38,9 +38,9 @@
     ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
                       org-path "~/org"
                       root-path "/snap/bin/root"))
-    ('windows-nt (setq yadisk-path (concat (getenv "USERPROFILE") "/YandexDisk")
-                       org-path yadisk-path "/org")
-                       root-path "C:\\root_v6.28.00\\bin\\root.exe"))
+    ('windows-nt (setq yadisk-path "Z:"
+                       org-path (concat yadisk-path "/org")
+                       root-path "C:\\root_v6.28.00\\bin\\root.exe")))
 #+end_src
 
 #+begin_src emacs-lisp
