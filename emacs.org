@@ -516,6 +516,14 @@ This is for coloring exported code using Emacs native code coloring
   (require 'org)
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 #+end_src
+
+This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
+#+begin_src emacs-lisp
+  ;; (defun jupyter-julia-trim-latex (orig-fun data)
+    ;; (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
+
+  ;; (advice-add 'jupyter-org--parse-latex-element :around #'jupyter-julia-trim-latex)
+#+end_src
 ** Templates
 #+begin_src emacs-lisp
   (require 'org-tempo)
@@ -604,7 +612,7 @@ This is for coloring exported code using Emacs native code coloring
 *** Language Servers
 **** Eglot
 #+begin_src emacs-lisp
-  ;; (use-package eglot)
+  (use-package eglot)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -614,12 +622,17 @@ This is for coloring exported code using Emacs native code coloring
 #+end_src
 
 #+begin_src emacs-lisp
-  ;; (use-package consult-eglot)
+  (use-package consult-eglot)
 #+end_src
+
 **** LSP
 #+begin_src emacs-lisp
   (use-package lsp-mode)
   (use-package dap-mode)
+#+end_src
+
+#+begin_src emacs-lisp
+  (use-package consult-lsp)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -653,7 +666,7 @@ This is for coloring exported code using Emacs native code coloring
        (latex . t)
        (julia . t)
        (python . t)
-       ;; (ein . t)
+       (ein . t)
        (C . t)
        (jupyter . t)
        ))
