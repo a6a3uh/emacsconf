@@ -328,6 +328,7 @@
   ;; :custom
   ;; (org-latex-compiler "xelatex")
   :config
+  (require 'org-inlinetask)
   (setq org-ellipsis " ▾"
         ;; org-hide-emphasis-markers t
         org-src-fontify-natively t))
