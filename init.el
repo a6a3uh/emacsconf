@@ -337,6 +337,7 @@
 (defun my/org-confirm-babel-evaluate (lang body)
   (not (or (string= lang "jupyter-python")
            (string= lang "python")
+           (string= lang "dot")
            (string= lang "julia")
            (string= lang "jupyter-julia")
            (string= lang "C++")
@@ -382,6 +383,7 @@
 (add-to-list 'org-structure-template-alist '("jj" . "src jupyter-julia"))
 (add-to-list 'org-structure-template-alist '("cpp" . "src C++"))
 (add-to-list 'org-structure-template-alist '("root" . "src cern-root"))
+(add-to-list 'org-structure-template-alist '("dot" . "src dot"))
 
 (use-package org-remark)
 
@@ -464,6 +466,7 @@
      (python . t)
      (ein . t)
      (C . t)
+     (dot . t)
      (jupyter . t)
      ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes) )
