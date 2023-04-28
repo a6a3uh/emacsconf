@@ -58,7 +58,7 @@
 ;; Save what you entered into minibuffer prompts
 (setq history-length 25)
 (savehist-mode 1)
-
+(add-to-list 'savehist-additional-variables 'org-ai-openai-api-token)
 ;; Remember and restore the last cursor location of opened files
 (save-place-mode 1)
 
@@ -391,6 +391,26 @@
 
 (use-package valign)
 
+(use-package org-ai
+  :ensure t
+  :commands (org-ai-mode
+             org-ai-global-mode)
+  :init
+  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
+  (org-ai-global-mode) ; installs global keybindings on C-c M-a
+  :config
+  (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
+  (org-ai-install-yasnippets) ; if you are using yasnippet and want `ai` snippets
+)
+
+(use-package copilot
+  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
+  :ensure t)
+
+(add-hook 'prog-mode-hook 'copilot-mode)
+(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
+(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+
 (use-package pyvenv)
 
 (custom-set-variables '(python-shell-interpreter "ipython"))
@@ -399,7 +419,8 @@
 ;; as both try to ask simething in minibuffer
 ;; and second question invocation breaks first one
 ;; with complain about running minibuffer from minibuffer
-;; (add-hook 'python-mode-hook 'eglot-ensure)
+(add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
+(add-hook 'python-mode-hook 'eglot-ensure)
 
 (use-package cern-root-mode
   :after org
@@ -434,6 +455,7 @@
 ;; (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
 ;; (add-hook 'c-mode-hook 'eglot-ensure)
 ;; (add-hook 'c++-mode-hook 'eglot-ensure)
+(add-hook 'julia-mode-hook 'eglot-ensure)
 
 (use-package consult-eglot)
 
