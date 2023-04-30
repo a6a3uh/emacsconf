@@ -80,6 +80,59 @@
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
 (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
 
+(defun my-org-mode-scale-text (scale-factor)
+  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+  (let ((height (truncate (* scale-factor 100))))
+    (mapc (lambda (face)
+            (face-remap-add-relative face `(:height ,height)))
+          '(default org-block org-meta-line org-property-value org-block-begin-line org-block-end-line org-drawer org-special-keyword org-document-info-keyword org-document-info))))
+
+(defun my-org-mode-scale-latex (scale-factor)
+  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+  (setq-local org-format-latex-options (plist-put org-format-latex-options :scale (* scale-factor 1.5)))
+  ;; Refresh LaTeX previews
+  (when (fboundp 'org-latex-preview)
+    (org-latex-preview '(16))))
+
+(defvar my-org-text-scale-factor 1.0)
+
+(defun my-org-mode-scale-text-increase ()
+  (interactive)
+  (setq my-org-text-scale-factor (* my-org-text-scale-factor 1.25))
+  (my-org-mode-scale-text my-org-text-scale-factor))
+
+(defun my-org-mode-scale-text-decrease ()
+  (interactive)
+  (setq my-org-text-scale-factor (/ my-org-text-scale-factor 1.25))
+  (my-org-mode-scale-text my-org-text-scale-factor))
+
+(defun my-org-mode-reset-text-scale ()
+  (interactive)
+  (setq my-org-text-scale-factor 1.0)
+  (my-org-mode-scale-text my-org-text-scale-factor))
+
+(defvar my-org-latex-scale-factor 1.0)
+
+(defun my-org-mode-scale-latex-increase ()
+  (interactive)
+  (setq my-org-latex-scale-factor (* my-org-latex-scale-factor 1.25))
+  (my-org-mode-scale-latex my-org-latex-scale-factor))
+
+(defun my-org-mode-scale-latex-decrease ()
+  (interactive)
+  (setq my-org-latex-scale-factor (/ my-org-latex-scale-factor 1.25))
+  (my-org-mode-scale-latex my-org-latex-scale-factor))
+
+(defun my-org-mode-reset-latex-scale ()
+  (interactive)
+  (setq my-org-latex-scale-factor 1.0)
+  (my-org-mode-scale-latex my-org-latex-scale-factor))
+
+(defun my-org-mode-scale-text-and-latex (scale-factor)
+  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+  (my-org-mode-scale-text scale-factor)
+  (my-org-mode-scale-latex scale-factor))
+
 (use-package vertico
   :custom
   (vertico-count 13)                    ; Number of candidates to display
@@ -272,12 +325,21 @@
 
 (defhydra hydra-text-scale (:timeout 4)
   "scale text"
-  ("j" text-scale-increase "in")
-  ("k" text-scale-decrease "out")
+  ("j" my-org-mode-scale-text-increase "in")
+  ("k" my-org-mode-scale-text-decrease "out")
   ("f" nil "finished" :exit t))
 
 (rune/leader-keys
   "ts" '(hydra-text-scale/body :which-key "scale text"))
+
+(defhydra hydra-latex-scale (:timeout 4)
+  "scale latex"
+  ("j" my-org-mode-scale-latex-increase "in")
+  ("k" my-org-mode-scale-latex-decrease "out")
+  ("f" nil "finished" :exit t))
+
+(rune/leader-keys
+  "tl" '(hydra-latex-scale/body :which-key "scale LaTeX"))
 
 (use-package projectile
   :diminish projectile-mode
@@ -415,13 +477,6 @@
 
 (custom-set-variables '(python-shell-interpreter "ipython"))
 
-;; This does not works with dir-locals setting pyvenv
-;; as both try to ask simething in minibuffer
-;; and second question invocation breaks first one
-;; with complain about running minibuffer from minibuffer
-(add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
-(add-hook 'python-mode-hook 'eglot-ensure)
-
 (use-package cern-root-mode
   :after org
   :bind (:map c++-mode-map
@@ -440,8 +495,6 @@
 (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
 (add-hook 'julia-mode-hook 'company-mode)
 (add-hook 'julia-mode-hook 'company-quickhelp-mode)
-(add-hook 'julia-mode-hook 'eglot-jl-init)
-(add-hook 'julia-mode-hook 'eglot-ensure)
 (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 
 (use-package eglot-jl)
@@ -455,7 +508,10 @@
 ;; (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
 ;; (add-hook 'c-mode-hook 'eglot-ensure)
 ;; (add-hook 'c++-mode-hook 'eglot-ensure)
+(add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
 (add-hook 'julia-mode-hook 'eglot-ensure)
+(add-hook 'julia-mode-hook 'eglot-jl-init)
+(add-hook 'python-mode-hook 'eglot-ensure)
 
 (use-package consult-eglot)
 
@@ -472,8 +528,6 @@
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
   (require 'dap-cpptools)
   (yas-global-mode))
-
-(use-package consult-lsp)
 
 (use-package jupyter)
 

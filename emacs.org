@@ -116,6 +116,73 @@ Some reverts
   (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
 #+end_src
 
+Scale all text including all the fields in org-mode
+#+begin_src emacs-lisp
+  (defun my-org-mode-scale-text (scale-factor)
+    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+    (let ((height (truncate (* scale-factor 100))))
+      (mapc (lambda (face)
+              (face-remap-add-relative face `(:height ,height)))
+            '(default org-block org-meta-line org-property-value org-block-begin-line org-block-end-line org-drawer org-special-keyword org-document-info-keyword org-document-info))))
+#+end_src
+
+Scale latex
+#+begin_src emacs-lisp
+  (defun my-org-mode-scale-latex (scale-factor)
+    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+    (setq-local org-format-latex-options (plist-put org-format-latex-options :scale (* scale-factor 1.5)))
+    ;; Refresh LaTeX previews
+    (when (fboundp 'org-latex-preview)
+      (org-latex-preview '(16))))
+#+end_src
+
+Incremental scaling and reset for text
+#+begin_src emacs-lisp
+  (defvar my-org-text-scale-factor 1.0)
+
+  (defun my-org-mode-scale-text-increase ()
+    (interactive)
+    (setq my-org-text-scale-factor (* my-org-text-scale-factor 1.25))
+    (my-org-mode-scale-text my-org-text-scale-factor))
+
+  (defun my-org-mode-scale-text-decrease ()
+    (interactive)
+    (setq my-org-text-scale-factor (/ my-org-text-scale-factor 1.25))
+    (my-org-mode-scale-text my-org-text-scale-factor))
+
+  (defun my-org-mode-reset-text-scale ()
+    (interactive)
+    (setq my-org-text-scale-factor 1.0)
+    (my-org-mode-scale-text my-org-text-scale-factor))
+#+end_src
+
+Incremental scalint and reset fot latex
+#+begin_src emacs-lisp
+  (defvar my-org-latex-scale-factor 1.0)
+
+  (defun my-org-mode-scale-latex-increase ()
+    (interactive)
+    (setq my-org-latex-scale-factor (* my-org-latex-scale-factor 1.25))
+    (my-org-mode-scale-latex my-org-latex-scale-factor))
+
+  (defun my-org-mode-scale-latex-decrease ()
+    (interactive)
+    (setq my-org-latex-scale-factor (/ my-org-latex-scale-factor 1.25))
+    (my-org-mode-scale-latex my-org-latex-scale-factor))
+
+  (defun my-org-mode-reset-latex-scale ()
+    (interactive)
+    (setq my-org-latex-scale-factor 1.0)
+    (my-org-mode-scale-latex my-org-latex-scale-factor))
+#+end_src
+
+Simulataneous scaling text and latex
+#+begin_src emacs-lisp
+  (defun my-org-mode-scale-text-and-latex (scale-factor)
+    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
+    (my-org-mode-scale-text scale-factor)
+    (my-org-mode-scale-latex scale-factor))
+#+end_src
 * Autocompletion
 Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 #+begin_src emacs-lisp
@@ -398,12 +465,21 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
 
   (defhydra hydra-text-scale (:timeout 4)
     "scale text"
-    ("j" text-scale-increase "in")
-    ("k" text-scale-decrease "out")
+    ("j" my-org-mode-scale-text-increase "in")
+    ("k" my-org-mode-scale-text-decrease "out")
     ("f" nil "finished" :exit t))
 
   (rune/leader-keys
     "ts" '(hydra-text-scale/body :which-key "scale text"))
+
+  (defhydra hydra-latex-scale (:timeout 4)
+    "scale latex"
+    ("j" my-org-mode-scale-latex-increase "in")
+    ("k" my-org-mode-scale-latex-decrease "out")
+    ("f" nil "finished" :exit t))
+
+  (rune/leader-keys
+    "tl" '(hydra-latex-scale/body :which-key "scale LaTeX"))
 #+end_src
 * Projects
 #+begin_src emacs-lisp
@@ -589,14 +665,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (custom-set-variables '(python-shell-interpreter "ipython"))
 #+end_src
 
-#+begin_src emacs-lisp
-  ;; This does not works with dir-locals setting pyvenv
-  ;; as both try to ask simething in minibuffer
-  ;; and second question invocation breaks first one
-  ;; with complain about running minibuffer from minibuffer
-  (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
-  (add-hook 'python-mode-hook 'eglot-ensure)
-#+end_src
 *** C/C++
 #+begin_src emacs-lisp
   (use-package cern-root-mode
@@ -621,8 +689,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
   (add-hook 'julia-mode-hook 'company-mode)
   (add-hook 'julia-mode-hook 'company-quickhelp-mode)
-  (add-hook 'julia-mode-hook 'eglot-jl-init)
-  (add-hook 'julia-mode-hook 'eglot-ensure)
   (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 #+end_src
 
@@ -649,7 +715,10 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   ;; (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
   ;; (add-hook 'c-mode-hook 'eglot-ensure)
   ;; (add-hook 'c++-mode-hook 'eglot-ensure)
+  (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
   (add-hook 'julia-mode-hook 'eglot-ensure)
+  (add-hook 'julia-mode-hook 'eglot-jl-init)
+  (add-hook 'python-mode-hook 'eglot-ensure)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -677,9 +746,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     (yas-global-mode))
 #+end_src
 
-#+begin_src emacs-lisp
-  (use-package consult-lsp)
-#+end_src
 *** Jupyter
 #+begin_src emacs-lisp
   (use-package jupyter)
