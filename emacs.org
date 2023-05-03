@@ -123,7 +123,10 @@ Scale all text including all the fields in org-mode
     (let ((height (truncate (* scale-factor 100))))
       (mapc (lambda (face)
               (face-remap-add-relative face `(:height ,height)))
-            '(default org-block org-meta-line org-property-value org-block-begin-line org-block-end-line org-drawer org-special-keyword org-document-info-keyword org-document-info))))
+            '(default org-block org-meta-line org-property-value
+               org-block-begin-line org-block-end-line org-drawer
+               org-special-keyword org-document-info-keyword
+               org-document-info org-table))))
 #+end_src
 
 Scale latex

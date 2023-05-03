@@ -85,7 +85,10 @@
   (let ((height (truncate (* scale-factor 100))))
     (mapc (lambda (face)
             (face-remap-add-relative face `(:height ,height)))
-          '(default org-block org-meta-line org-property-value org-block-begin-line org-block-end-line org-drawer org-special-keyword org-document-info-keyword org-document-info))))
+          '(default org-block org-meta-line org-property-value
+             org-block-begin-line org-block-end-line org-drawer
+             org-special-keyword org-document-info-keyword
+             org-document-info org-table))))
 
 (defun my-org-mode-scale-latex (scale-factor)
   (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
