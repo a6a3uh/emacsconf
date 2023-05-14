@@ -403,6 +403,23 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     (evil-collection-define-key 'normal 'dired-mode-map
       "H" 'dired-hide-dotfiles-mode))
 #+end_src
+
+This does not works properly yet. But it is good to set it up eventually somehow.
+#+begin_comment
+#+begin_src emacs-lisp
+  (use-package visual-fill-column
+    :hook (visual-line-mode . visual-fill-column-mode)
+    :config
+    (visual-fill-column-mode 100))
+#+end_src
+#+end_comment
+
+#+begin_src emacs-lisp
+  (use-package mixed-pitch
+    :hook
+    ;; If you want it in all text modes:
+    (text-mode . mixed-pitch-mode))
+#+end_src
 * Windows
 #+begin_src emacs-lisp
   (use-package ace-window
@@ -633,6 +650,10 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 #+begin_src emacs-lisp
   (use-package valign)
 #+end_src
+#+begin_src emacs-lisp
+  (use-package org-modern)
+  (with-eval-after-load 'org (global-org-modern-mode))
+#+end_src
 * AI
 #+begin_src emacs-lisp
   (use-package org-ai
@@ -643,7 +664,8 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
     (org-ai-global-mode) ; installs global keybindings on C-c M-a
     :config
-    (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
+    (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
+    ;; (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
     (org-ai-install-yasnippets) ; if you are using yasnippet and want `ai` snippets
   )
 #+end_src

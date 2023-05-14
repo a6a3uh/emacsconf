@@ -277,6 +277,11 @@
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode))
 
+(use-package mixed-pitch
+  :hook
+  ;; If you want it in all text modes:
+  (text-mode . mixed-pitch-mode))
+
 (use-package ace-window
   :straight t)
 (setq aw-dispatch-always t)
@@ -456,6 +461,9 @@
 
 (use-package valign)
 
+(use-package org-modern)
+(with-eval-after-load 'org (global-org-modern-mode))
+
 (use-package org-ai
   :ensure t
   :commands (org-ai-mode
@@ -464,7 +472,8 @@
   (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
   (org-ai-global-mode) ; installs global keybindings on C-c M-a
   :config
-  (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
+  (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
+  ;; (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
   (org-ai-install-yasnippets) ; if you are using yasnippet and want `ai` snippets
 )
 
