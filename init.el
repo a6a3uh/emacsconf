@@ -30,7 +30,8 @@
                      org-path (concat yadisk-path "/org")
                      root-path "C:\\root_v6.28.00\\bin\\root.exe")))
 
-(setq my/bib-files (list (concat yadisk-path "/phd/phd.bib")))
+(setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
+(setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 
 (setq-default buffer-file-coding-system 'utf-8)
 (setq-default coding-system-for-read 'utf-8)
@@ -74,7 +75,7 @@
 (setq global-auto-revert-none-file-buffers t)
 
 ;; Load customizable theme
-(load-theme 'modus-vivendi t)
+(load-theme 'modus-operandi t)
 
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
@@ -619,7 +620,7 @@
          ("M-b" . citar-insert-preset))
   :custom
   (citar-bibliography my/bib-files)
-  (citar-library-paths (list (concat yadisk-path "/phd/papers")))
+  (citar-library-paths my/pdf-files)
   (citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)

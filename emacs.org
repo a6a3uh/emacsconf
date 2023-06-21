@@ -45,7 +45,8 @@
 #+end_src
 
 #+begin_src emacs-lisp
-    (setq my/bib-files (list (concat yadisk-path "/phd/phd.bib")))
+    (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
+    (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 #+end_src
 * Coding
 #+begin_src emacs-lisp
@@ -106,7 +107,7 @@ Some reverts
 ** Theme
 #+begin_src emacs-lisp
   ;; Load customizable theme
-  (load-theme 'modus-vivendi t)
+  (load-theme 'modus-operandi t)
 #+end_src
 ** Font Configuration
 
@@ -886,7 +887,7 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
            ("M-b" . citar-insert-preset))
     :custom
     (citar-bibliography my/bib-files)
-    (citar-library-paths (list (concat yadisk-path "/phd/papers")))
+    (citar-library-paths my/pdf-files)
     (citar-notes-paths (list (concat org-path "/roam/references")))
     (citar-file-extensions '("pdf" "org" "md"))
     (org-cite-insert-processor 'citar)
