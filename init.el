@@ -368,8 +368,13 @@
      :config
      (direnv-mode)))
 
-(use-package dirvish)
-(dirvish-override-dired-mode)
+(use-package dirvish
+  :after evil-collection
+  :init (dirvish-override-dired-mode)
+  :config
+  (evil-collection-define-key 'normal 'dirvish-mode-map
+    "q" 'dirvish-quit)
+)
 
 (add-hook 'dired-mode-hook
           (lambda ()

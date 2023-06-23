@@ -525,8 +525,13 @@ This does not works properly yet. But it is good to set it up eventually somehow
      (direnv-mode)))
 #+end_src
 #+begin_src emacs-lisp
-  (use-package dirvish)
-  (dirvish-override-dired-mode)
+  (use-package dirvish
+    :after evil-collection
+    :init (dirvish-override-dired-mode)
+    :config
+    (evil-collection-define-key 'normal 'dirvish-mode-map
+      "q" 'dirvish-quit)
+  )
 #+end_src
 
 #+BEGIN_COMMENT
