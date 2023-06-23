@@ -19,7 +19,7 @@
 (use-package no-littering)
 
 (use-package exec-path-from-shell)
-(when (memq window-system '(mac ns x))
+(when (not (eq system-type 'windows-nt))
   (exec-path-from-shell-initialize))
 
 (cl-case system-type
@@ -218,7 +218,7 @@
     "f" '(:ignore t :which-key "files")
     "ff" '(consult-recent-file :which-key "recent files")
     "fd" '(dired :which-key "dired")
-    "fr" '(ranger :which-key "ranger")
+    "fr" '(dirvish :which-key "dirvish")
     "tn" '(display-line-numbers-mode :which-key "line numbers")
     "p" '(consult-projectile :which-key "select projects")
     "b" '(consult-buffer :which-key "select buffer")
@@ -368,11 +368,8 @@
      :config
      (direnv-mode)))
 
-(use-package ranger
-  :straight t
-  :after dired
-  :custom (ranger-show-hidden t)
-  )
+(use-package dirvish)
+(dirvish-override-dired-mode)
 
 (add-hook 'dired-mode-hook
           (lambda ()

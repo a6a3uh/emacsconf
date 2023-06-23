@@ -30,7 +30,7 @@
 * Env Variables
 #+begin_src emacs-lisp
   (use-package exec-path-from-shell)
-  (when (memq window-system '(mac ns x))
+  (when (not (eq system-type 'windows-nt))
     (exec-path-from-shell-initialize))
 #+end_src
 
@@ -323,7 +323,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
       "f" '(:ignore t :which-key "files")
       "ff" '(consult-recent-file :which-key "recent files")
       "fd" '(dired :which-key "dired")
-      "fr" '(ranger :which-key "ranger")
+      "fr" '(dirvish :which-key "dirvish")
       "tn" '(display-line-numbers-mode :which-key "line numbers")
       "p" '(consult-projectile :which-key "select projects")
       "b" '(consult-buffer :which-key "select buffer")
@@ -524,7 +524,12 @@ This does not works properly yet. But it is good to set it up eventually somehow
      :config
      (direnv-mode)))
 #+end_src
+#+begin_src emacs-lisp
+  (use-package dirvish)
+  (dirvish-override-dired-mode)
+#+end_src
 
+#+BEGIN_COMMENT
 #+begin_src emacs-lisp
   (use-package ranger
     :straight t
@@ -532,6 +537,7 @@ This does not works properly yet. But it is good to set it up eventually somehow
     :custom (ranger-show-hidden t)
     )
 #+end_src
+#+END_COMMENT
 
 #+begin_src emacs-lisp
   (add-hook 'dired-mode-hook
