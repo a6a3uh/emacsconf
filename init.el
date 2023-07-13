@@ -77,9 +77,9 @@
 ;; Load customizable theme
 (load-theme 'modus-operandi t)
 
-(set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
-(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
+(set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
+(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 165)
 
 (defun my-org-mode-scale-text (scale-factor)
   (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
@@ -514,7 +514,9 @@
 
 (use-package eglot-jl)
 
-(use-package ess)
+(use-package lsp-julia
+  :config
+  (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
 
 (use-package yasnippet)
 
@@ -524,9 +526,9 @@
 ;; (add-hook 'c-mode-hook 'eglot-ensure)
 ;; (add-hook 'c++-mode-hook 'eglot-ensure)
 (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
-(add-hook 'julia-mode-hook 'eglot-ensure)
-(add-hook 'julia-mode-hook 'eglot-jl-init)
 (add-hook 'python-mode-hook 'eglot-ensure)
+;; (add-hook 'julia-mode-hook 'eglot-ensure)
+;; (add-hook 'julia-mode-hook 'eglot-jl-init)
 
 (use-package consult-eglot)
 
@@ -538,6 +540,8 @@
 (which-key-mode)
 (add-hook 'c-mode-hook 'lsp)
 (add-hook 'c++-mode-hook 'lsp)
+
+(add-hook 'julia-mode-hook 'lsp)
 
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)

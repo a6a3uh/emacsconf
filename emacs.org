@@ -112,9 +112,9 @@ Some reverts
 ** Font Configuration
 
 #+begin_src emacs-lisp
-  (set-face-attribute 'default nil :font "JetBrains Mono" :height 130)
-  (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 130)
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140)
+  (set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
+  (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 165)
 #+end_src
 
 Scale all text including all the fields in org-mode
@@ -734,8 +734,28 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 #+end_src
 
 #+begin_src emacs-lisp
+  (use-package lsp-julia
+    :config
+    (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
+#+end_src
+#+begin_
+src emacs-lisp
   (use-package ess)
 #+end_src
+
+#+BEGIN_COMMENT
+#+begin_src emacs-lisp
+  (defun my-julia-latexsub-or-indent ()
+    "Interactive command to call `julia-latexsub-or-indent`."
+    (interactive)
+    (julia-latexsub-or-indent))
+#+end_src
+
+#+begin_src emacs-lisp
+  (with-eval-after-load 'jupyter-repl
+    (define-key jupyter-repl-mode-map (kbd "TAB") 'my-julia-latexsub-or-indent))
+#+end_src
+#+END_COMMENT
 *** Haskell
 
 *** Templating
@@ -753,9 +773,9 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   ;; (add-hook 'c-mode-hook 'eglot-ensure)
   ;; (add-hook 'c++-mode-hook 'eglot-ensure)
   (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
-  (add-hook 'julia-mode-hook 'eglot-ensure)
-  (add-hook 'julia-mode-hook 'eglot-jl-init)
   (add-hook 'python-mode-hook 'eglot-ensure)
+  ;; (add-hook 'julia-mode-hook 'eglot-ensure)
+  ;; (add-hook 'julia-mode-hook 'eglot-jl-init)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -776,6 +796,8 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (which-key-mode)
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'c++-mode-hook 'lsp)
+
+  (add-hook 'julia-mode-hook 'lsp)
 
   (with-eval-after-load 'lsp-mode
     (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
