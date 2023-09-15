@@ -33,6 +33,12 @@
 (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
 (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 
+(use-package direnv
+  :config
+  (direnv-mode))
+
+(use-package rg)
+
 (setq-default buffer-file-coding-system 'utf-8)
 (setq-default coding-system-for-read 'utf-8)
 (prefer-coding-system 'utf-8)
@@ -151,10 +157,11 @@
 (use-package orderless
   :custom
   (completion-styles '(orderless))      ; Use orderless
-  (completion-category-defaults nil)    ; I want to be in control!
-  (completion-category-overrides
-   '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
-                   orderless)))))
+  ;; (completion-category-defaults nil)    ; I want to be in control!
+  ;; (completion-category-overrides
+   ;; '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+                  ;; - orderless)))))
+)
 
 ;; to show additional columns of info
 (use-package marginalia
@@ -413,6 +420,7 @@
            (string= lang "dot")
            (string= lang "julia")
            (string= lang "jupyter-julia")
+           (string= lang "latex")
            (string= lang "C++")
            (string= lang "cern-root")
            (string= lang "emacs-lisp"))))
@@ -464,29 +472,8 @@
 
 (use-package valign)
 
-(use-package org-modern)
-(with-eval-after-load 'org (global-org-modern-mode))
-
-(use-package org-ai
-  :ensure t
-  :commands (org-ai-mode
-             org-ai-global-mode)
-  :init
-  (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-  (org-ai-global-mode) ; installs global keybindings on C-c M-a
-  :config
-  (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
-  ;; (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
-  (org-ai-install-yasnippets) ; if you are using yasnippet and want `ai` snippets
-)
-
-(use-package copilot
-  :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
-  :ensure t)
-
-(add-hook 'prog-mode-hook 'copilot-mode)
-(define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-(define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
+;; (use-package org-modern)
+;; (with-eval-after-load 'org (global-org-modern-mode))
 
 (use-package pyvenv)
 
@@ -510,13 +497,15 @@
 (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
 (add-hook 'julia-mode-hook 'company-mode)
 (add-hook 'julia-mode-hook 'company-quickhelp-mode)
-(add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
+;; (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 
 (use-package eglot-jl)
 
 (use-package lsp-julia
   :config
   (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
+
+(use-package cmake-mode)
 
 (use-package yasnippet)
 
@@ -526,9 +515,10 @@
 ;; (add-hook 'c-mode-hook 'eglot-ensure)
 ;; (add-hook 'c++-mode-hook 'eglot-ensure)
 (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
+
 (add-hook 'python-mode-hook 'eglot-ensure)
-;; (add-hook 'julia-mode-hook 'eglot-ensure)
-;; (add-hook 'julia-mode-hook 'eglot-jl-init)
+(add-hook 'julia-mode-hook 'eglot-ensure)
+(add-hook 'julia-mode-hook 'eglot-jl-init)
 
 (use-package consult-eglot)
 
@@ -541,7 +531,7 @@
 (add-hook 'c-mode-hook 'lsp)
 (add-hook 'c++-mode-hook 'lsp)
 
-(add-hook 'julia-mode-hook 'lsp)
+;; (add-hook 'julia-mode-hook 'lsp)
 
 (with-eval-after-load 'lsp-mode
   (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
@@ -550,8 +540,6 @@
 
 (use-package jupyter)
 
-(use-package ein)
-
 (with-eval-after-load 'org
   (org-babel-do-load-languages
    'org-babel-load-languages
@@ -559,7 +547,7 @@
      (latex . t)
      (julia . t)
      (python . t)
-     (ein . t)
+     ;;(ein . t)
      (C . t)
      (dot . t)
      (jupyter . t)
@@ -579,16 +567,6 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(use-package tree-sitter)
-(use-package tree-sitter-langs)
-(global-tree-sitter-mode)
-
-(use-package ts-fold
-  :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
-
-(use-package ts-fold-indicators
-  :straight (ts-fold-indicators :type git :host github :repo "emacs-tree-sitter/ts-fold"))
-
 (when (equal system-type 'gnu/linux)
   (use-package vterm))
 
@@ -596,9 +574,6 @@
 (use-package eshell
   :config
   (eshell-git-prompt-use-theme 'powerline))
-
-(use-package org-fragtog)
-(add-hook 'org-mode-hook 'org-fragtog-mode)
 
 (use-package pdf-tools
   :config

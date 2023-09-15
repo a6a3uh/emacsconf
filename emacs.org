@@ -48,6 +48,16 @@
     (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
     (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 #+end_src
+
+#+begin_src emacs-lisp
+  (use-package direnv
+    :config
+    (direnv-mode))
+#+end_src
+* Search
+#+begin_src emacs-lisp
+  (use-package rg)
+#+end_src
 * Coding
 #+begin_src emacs-lisp
   (setq-default buffer-file-coding-system 'utf-8)
@@ -232,10 +242,11 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
   (use-package orderless
     :custom
     (completion-styles '(orderless))      ; Use orderless
-    (completion-category-defaults nil)    ; I want to be in control!
-    (completion-category-overrides
-     '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
-                     orderless)))))
+    ;; (completion-category-defaults nil)    ; I want to be in control!
+    ;; (completion-category-overrides
+     ;; '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
+                    ;; - orderless)))))
+  )
 #+end_src
 
 #+begin_src emacs-lisp
@@ -589,6 +600,7 @@ This does not works properly yet. But it is good to set it up eventually somehow
              (string= lang "dot")
              (string= lang "julia")
              (string= lang "jupyter-julia")
+             (string= lang "latex")
              (string= lang "C++")
              (string= lang "cern-root")
              (string= lang "emacs-lisp"))))
@@ -663,10 +675,11 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (use-package valign)
 #+end_src
 #+begin_src emacs-lisp
-  (use-package org-modern)
-  (with-eval-after-load 'org (global-org-modern-mode))
+  ;; (use-package org-modern)
+  ;; (with-eval-after-load 'org (global-org-modern-mode))
 #+end_src
 * AI
+#+begin_comment
 #+begin_src emacs-lisp
   (use-package org-ai
     :ensure t
@@ -692,6 +705,7 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
   (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
 #+end_src
+#+end_comment
 * Development
 ** Languages
 *** Python
@@ -726,7 +740,7 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
   (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
   (add-hook 'julia-mode-hook 'company-mode)
   (add-hook 'julia-mode-hook 'company-quickhelp-mode)
-  (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
+  ;; (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -738,12 +752,12 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     :config
     (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
 #+end_src
-#+begin_
+
+#+BEGIN_COMMENT
 src emacs-lisp
   (use-package ess)
 #+end_src
 
-#+BEGIN_COMMENT
 #+begin_src emacs-lisp
   (defun my-julia-latexsub-or-indent ()
     "Interactive command to call `julia-latexsub-or-indent`."
@@ -758,6 +772,10 @@ src emacs-lisp
 #+END_COMMENT
 *** Haskell
 
+*** CMake
+#+begin_src emacs-lisp
+  (use-package cmake-mode)
+#+end_src
 *** Templating
 #+begin_src emacs-lisp
   (use-package yasnippet)
@@ -773,9 +791,10 @@ src emacs-lisp
   ;; (add-hook 'c-mode-hook 'eglot-ensure)
   ;; (add-hook 'c++-mode-hook 'eglot-ensure)
   (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
+
   (add-hook 'python-mode-hook 'eglot-ensure)
-  ;; (add-hook 'julia-mode-hook 'eglot-ensure)
-  ;; (add-hook 'julia-mode-hook 'eglot-jl-init)
+  (add-hook 'julia-mode-hook 'eglot-ensure)
+  (add-hook 'julia-mode-hook 'eglot-jl-init)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -797,7 +816,7 @@ src emacs-lisp
   (add-hook 'c-mode-hook 'lsp)
   (add-hook 'c++-mode-hook 'lsp)
 
-  (add-hook 'julia-mode-hook 'lsp)
+  ;; (add-hook 'julia-mode-hook 'lsp)
 
   (with-eval-after-load 'lsp-mode
     (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
@@ -810,9 +829,11 @@ src emacs-lisp
   (use-package jupyter)
 #+end_src
 
+#+begin_comment
 #+begin_src emacs-lisp
   (use-package ein) 
 #+end_src
+#+end_comment
 
 #+begin_src emacs-lisp
   (with-eval-after-load 'org
@@ -822,7 +843,7 @@ src emacs-lisp
        (latex . t)
        (julia . t)
        (python . t)
-       (ein . t)
+       ;;(ein . t)
        (C . t)
        (dot . t)
        (jupyter . t)
@@ -856,11 +877,15 @@ src emacs-lisp
     :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 #+end_src
 *** Tree-Sitter
+#+begin_comment
 #+begin_src emacs-lisp
   (use-package tree-sitter)
   (use-package tree-sitter-langs)
   (global-tree-sitter-mode)
 #+end_src
+#+end_comment
+
+#+begin_comment
 #+begin_src emacs-lisp
   (use-package ts-fold
     :straight (ts-fold :type git :host github :repo "emacs-tree-sitter/ts-fold"))
@@ -870,6 +895,7 @@ src emacs-lisp
   (use-package ts-fold-indicators
     :straight (ts-fold-indicators :type git :host github :repo "emacs-tree-sitter/ts-fold"))
 #+end_src
+#+end_comment
 * Terminal
 ** VTerm
 #+begin_src emacs-lisp
@@ -884,10 +910,12 @@ src emacs-lisp
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
 * Math
+#+begin_comment
 #+begin_src emacs-lisp
 (use-package org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
 #+end_src
+#+end_comment
 
 #+begin_src emacs-lisp
   (use-package pdf-tools
