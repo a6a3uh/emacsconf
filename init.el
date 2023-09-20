@@ -333,6 +333,9 @@
   :config
   (evil-collection-init))
 
+(use-package evil-textobj-tree-sitter
+  :straight t)
+
 (use-package hydra
   :defer t)
 
@@ -444,7 +447,7 @@
 (setq org-latex-src-block-backend 'engraved)
 
 (require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
 
 ;; (defun jupyter-julia-trim-latex (orig-fun data)
   ;; (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
