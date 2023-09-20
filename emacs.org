@@ -485,10 +485,12 @@ This does not works properly yet. But it is good to set it up eventually somehow
     (evil-collection-init))
 #+end_src
 
+#+begin_comment
 #+begin_src emacs-lisp
   (use-package evil-textobj-tree-sitter
     :straight t)
 #+end_src
+#+end_comment
 
 * Hydra stuff
 #+begin_src emacs-lisp

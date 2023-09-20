@@ -333,9 +333,6 @@
   :config
   (evil-collection-init))
 
-(use-package evil-textobj-tree-sitter
-  :straight t)
-
 (use-package hydra
   :defer t)
 
