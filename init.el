@@ -554,6 +554,8 @@
      ))
   (push '("conf-unix" . conf-unix) org-src-lang-modes) )
 
+(org-babel-jupyter-override-src-block "julia")
+
 (use-package company
   :straight t
   :bind (:map company-active-map

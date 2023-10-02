@@ -849,6 +849,8 @@ src emacs-lisp
        (jupyter . t)
        ))
     (push '("conf-unix" . conf-unix) org-src-lang-modes) )
+
+  (org-babel-jupyter-override-src-block "julia")
 #+end_src
 
 *** Completion
