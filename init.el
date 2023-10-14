@@ -85,63 +85,6 @@
 
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 165)
-
-(defun my-org-mode-scale-text (scale-factor)
-  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-  (let ((height (truncate (* scale-factor 100))))
-    (mapc (lambda (face)
-            (face-remap-add-relative face `(:height ,height)))
-          '(default org-block org-meta-line org-property-value
-             org-block-begin-line org-block-end-line org-drawer
-             org-special-keyword org-document-info-keyword
-             org-document-info org-table))))
-
-(defun my-org-mode-scale-latex (scale-factor)
-  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-  (setq-local org-format-latex-options (plist-put org-format-latex-options :scale (* scale-factor 1.5)))
-  ;; Refresh LaTeX previews
-  (when (fboundp 'org-latex-preview)
-    (org-latex-preview '(16))))
-
-(defvar my-org-text-scale-factor 1.0)
-
-(defun my-org-mode-scale-text-increase ()
-  (interactive)
-  (setq my-org-text-scale-factor (* my-org-text-scale-factor 1.25))
-  (my-org-mode-scale-text my-org-text-scale-factor))
-
-(defun my-org-mode-scale-text-decrease ()
-  (interactive)
-  (setq my-org-text-scale-factor (/ my-org-text-scale-factor 1.25))
-  (my-org-mode-scale-text my-org-text-scale-factor))
-
-(defun my-org-mode-reset-text-scale ()
-  (interactive)
-  (setq my-org-text-scale-factor 1.0)
-  (my-org-mode-scale-text my-org-text-scale-factor))
-
-(defvar my-org-latex-scale-factor 1.0)
-
-(defun my-org-mode-scale-latex-increase ()
-  (interactive)
-  (setq my-org-latex-scale-factor (* my-org-latex-scale-factor 1.25))
-  (my-org-mode-scale-latex my-org-latex-scale-factor))
-
-(defun my-org-mode-scale-latex-decrease ()
-  (interactive)
-  (setq my-org-latex-scale-factor (/ my-org-latex-scale-factor 1.25))
-  (my-org-mode-scale-latex my-org-latex-scale-factor))
-
-(defun my-org-mode-reset-latex-scale ()
-  (interactive)
-  (setq my-org-latex-scale-factor 1.0)
-  (my-org-mode-scale-latex my-org-latex-scale-factor))
-
-(defun my-org-mode-scale-text-and-latex (scale-factor)
-  (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-  (my-org-mode-scale-text scale-factor)
-  (my-org-mode-scale-latex scale-factor))
 
 (use-package vertico
   :custom
@@ -157,10 +100,6 @@
 (use-package orderless
   :custom
   (completion-styles '(orderless))      ; Use orderless
-  ;; (completion-category-defaults nil)    ; I want to be in control!
-  ;; (completion-category-overrides
-   ;; '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
-                  ;; - orderless)))))
 )
 
 ;; to show additional columns of info
@@ -447,7 +386,7 @@
 (setq org-latex-src-block-backend 'engraved)
 
 (require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
 
 ;; (defun jupyter-julia-trim-latex (orig-fun data)
   ;; (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
@@ -471,9 +410,6 @@
 (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
 (use-package valign)
-
-;; (use-package org-modern)
-;; (with-eval-after-load 'org (global-org-modern-mode))
 
 (use-package pyvenv)
 

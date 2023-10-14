@@ -124,79 +124,8 @@ Some reverts
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
   (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 165)
 #+end_src
 
-Scale all text including all the fields in org-mode
-#+begin_src emacs-lisp
-  (defun my-org-mode-scale-text (scale-factor)
-    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-    (let ((height (truncate (* scale-factor 100))))
-      (mapc (lambda (face)
-              (face-remap-add-relative face `(:height ,height)))
-            '(default org-block org-meta-line org-property-value
-               org-block-begin-line org-block-end-line org-drawer
-               org-special-keyword org-document-info-keyword
-               org-document-info org-table))))
-#+end_src
-
-Scale latex
-#+begin_src emacs-lisp
-  (defun my-org-mode-scale-latex (scale-factor)
-    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-    (setq-local org-format-latex-options (plist-put org-format-latex-options :scale (* scale-factor 1.5)))
-    ;; Refresh LaTeX previews
-    (when (fboundp 'org-latex-preview)
-      (org-latex-preview '(16))))
-#+end_src
-
-Incremental scaling and reset for text
-#+begin_src emacs-lisp
-  (defvar my-org-text-scale-factor 1.0)
-
-  (defun my-org-mode-scale-text-increase ()
-    (interactive)
-    (setq my-org-text-scale-factor (* my-org-text-scale-factor 1.25))
-    (my-org-mode-scale-text my-org-text-scale-factor))
-
-  (defun my-org-mode-scale-text-decrease ()
-    (interactive)
-    (setq my-org-text-scale-factor (/ my-org-text-scale-factor 1.25))
-    (my-org-mode-scale-text my-org-text-scale-factor))
-
-  (defun my-org-mode-reset-text-scale ()
-    (interactive)
-    (setq my-org-text-scale-factor 1.0)
-    (my-org-mode-scale-text my-org-text-scale-factor))
-#+end_src
-
-Incremental scalint and reset fot latex
-#+begin_src emacs-lisp
-  (defvar my-org-latex-scale-factor 1.0)
-
-  (defun my-org-mode-scale-latex-increase ()
-    (interactive)
-    (setq my-org-latex-scale-factor (* my-org-latex-scale-factor 1.25))
-    (my-org-mode-scale-latex my-org-latex-scale-factor))
-
-  (defun my-org-mode-scale-latex-decrease ()
-    (interactive)
-    (setq my-org-latex-scale-factor (/ my-org-latex-scale-factor 1.25))
-    (my-org-mode-scale-latex my-org-latex-scale-factor))
-
-  (defun my-org-mode-reset-latex-scale ()
-    (interactive)
-    (setq my-org-latex-scale-factor 1.0)
-    (my-org-mode-scale-latex my-org-latex-scale-factor))
-#+end_src
-
-Simulataneous scaling text and latex
-#+begin_src emacs-lisp
-  (defun my-org-mode-scale-text-and-latex (scale-factor)
-    (interactive (list (read-number "Scale factor (e.g., 1.0 for no scaling): ")))
-    (my-org-mode-scale-text scale-factor)
-    (my-org-mode-scale-latex scale-factor))
-#+end_src
 * Autocompletion
 Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
 #+begin_src emacs-lisp
@@ -209,29 +138,6 @@ Good guide [[https://kristofferbalintona.me/posts/202202211546/][here]].
     (vertico-mode))
 #+end_src
 
-This tab messes up with Julia Tab special symbols completion feature
-#+begin_comment
-#+begin_src emacs-lisp
-;;function to implement a smarter TAB (EmacsWiki)
-(defun smart-tab ()
-  "This smart tab is minibuffer compliant: it acts as usual in
-    the minibuffer. Else, if mark is active, indents region. Else if
-    point is at the end of a symbol, expands it. Else indents the
-    current line."
-  (interactive)
-  (if (minibufferp)
-      (unless (minibuffer-complete)
-        (hippie-expand nil))
-    (if mark-active
-        (indent-region (region-beginning)
-                       (region-end))
-      (if (looking-at "\\_>")
-         (hippie-expand nil)
-        (indent-for-tab-command)))))
-(global-set-key (kbd "TAB") 'smart-tab)
-#+end_src
-#+end_comment
-
 This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter session for example. This will also desable Alt-TAB from switching windows releasing ot for completion function (on Windows only).
 #+begin_src emacs-lisp
 (define-key function-key-map [(control tab)] [?\M-\t])
@@ -242,10 +148,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
   (use-package orderless
     :custom
     (completion-styles '(orderless))      ; Use orderless
-    ;; (completion-category-defaults nil)    ; I want to be in control!
-    ;; (completion-category-overrides
-     ;; '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
-                    ;; - orderless)))))
   )
 #+end_src
 
@@ -274,16 +176,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     (setq prefix-help-command #'embark-prefix-help-command))
 #+end_src
 * Advanced UI
-# Does not works, no tangling #TODO
-#+begin_src emacs-lisp :tangle no
-  (straight-use-package
-   '(nano-emacs :type git :host github :repo "rougier/nano-emacs"))
-  ;; (require 'nano)
-  (require 'nano-theme)
-  (require 'nano-modeline)
-  ;;(nano-dark)
-#+end_src
-
 #+begin_src emacs-lisp
 ;; parences rainbow highliht
 (use-package rainbow-delimiters
@@ -416,16 +308,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
       "H" 'dired-hide-dotfiles-mode))
 #+end_src
 
-This does not works properly yet. But it is good to set it up eventually somehow.
-#+begin_comment
-#+begin_src emacs-lisp
-  (use-package visual-fill-column
-    :hook (visual-line-mode . visual-fill-column-mode)
-    :config
-    (visual-fill-column-mode 100))
-#+end_src
-#+end_comment
-
 #+begin_src emacs-lisp
   (use-package mixed-pitch
     :hook
@@ -545,16 +427,6 @@ This does not works properly yet. But it is good to set it up eventually somehow
   )
 #+end_src
 
-#+BEGIN_COMMENT
-#+begin_src emacs-lisp
-  (use-package ranger
-    :straight t
-    :after dired
-    :custom (ranger-show-hidden t)
-    )
-#+end_src
-#+END_COMMENT
-
 #+begin_src emacs-lisp
   (add-hook 'dired-mode-hook
             (lambda ()
@@ -637,7 +509,7 @@ This is for coloring exported code using Emacs native code coloring
 
 #+begin_src emacs-lisp
   (require 'org)
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
 #+end_src
 
 This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
@@ -673,10 +545,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 ** Tables
 #+begin_src emacs-lisp
   (use-package valign)
-#+end_src
-#+begin_src emacs-lisp
-  ;; (use-package org-modern)
-  ;; (with-eval-after-load 'org (global-org-modern-mode))
 #+end_src
 * AI
 #+begin_comment
@@ -753,23 +621,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
 #+end_src
 
-#+BEGIN_COMMENT
-src emacs-lisp
-  (use-package ess)
-#+end_src
-
-#+begin_src emacs-lisp
-  (defun my-julia-latexsub-or-indent ()
-    "Interactive command to call `julia-latexsub-or-indent`."
-    (interactive)
-    (julia-latexsub-or-indent))
-#+end_src
-
-#+begin_src emacs-lisp
-  (with-eval-after-load 'jupyter-repl
-    (define-key jupyter-repl-mode-map (kbd "TAB") 'my-julia-latexsub-or-indent))
-#+end_src
-#+END_COMMENT
 *** Haskell
 
 *** CMake
@@ -828,12 +679,6 @@ src emacs-lisp
 #+begin_src emacs-lisp
   (use-package jupyter)
 #+end_src
-
-#+begin_comment
-#+begin_src emacs-lisp
-  (use-package ein) 
-#+end_src
-#+end_comment
 
 #+begin_src emacs-lisp
   (with-eval-after-load 'org
