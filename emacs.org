@@ -372,29 +372,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     :straight t)
 #+end_src
 
-* Hydra stuff
-#+begin_src emacs-lisp
-  (use-package hydra
-    :defer t)
-
-  (defhydra hydra-text-scale (:timeout 4)
-    "scale text"
-    ("j" my-org-mode-scale-text-increase "in")
-    ("k" my-org-mode-scale-text-decrease "out")
-    ("f" nil "finished" :exit t))
-
-  (rune/leader-keys
-    "ts" '(hydra-text-scale/body :which-key "scale text"))
-
-  (defhydra hydra-latex-scale (:timeout 4)
-    "scale latex"
-    ("j" my-org-mode-scale-latex-increase "in")
-    ("k" my-org-mode-scale-latex-decrease "out")
-    ("f" nil "finished" :exit t))
-
-  (rune/leader-keys
-    "tl" '(hydra-latex-scale/body :which-key "scale LaTeX"))
-#+end_src
 * Projects
 #+begin_src emacs-lisp
   (use-package projectile
@@ -509,7 +486,7 @@ This is for coloring exported code using Emacs native code coloring
 
 #+begin_src emacs-lisp
   (require 'org)
-  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+  (setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 #+end_src
 
 This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
@@ -546,34 +523,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 #+begin_src emacs-lisp
   (use-package valign)
 #+end_src
-* AI
-#+begin_comment
-#+begin_src emacs-lisp
-  (use-package org-ai
-    :ensure t
-    :commands (org-ai-mode
-               org-ai-global-mode)
-    :init
-    (add-hook 'org-mode-hook #'org-ai-mode) ; enable org-ai in org-mode
-    (org-ai-global-mode) ; installs global keybindings on C-c M-a
-    :config
-    (setq org-ai-default-chat-model "gpt-4") ; if you are on the gpt-4 beta:
-    ;; (setq org-ai-default-chat-model "gpt-3.5-turbo") ; if you are on the gpt-4 beta:
-    (org-ai-install-yasnippets) ; if you are using yasnippet and want `ai` snippets
-  )
-#+end_src
-#+begin_src emacs-lisp
-  (use-package copilot
-    :straight (:host github :repo "zerolfx/copilot.el" :files ("dist" "*.el"))
-    :ensure t)
-#+end_src
-
-#+begin_src emacs-lisp
-  (add-hook 'prog-mode-hook 'copilot-mode)
-  (define-key copilot-completion-map (kbd "<tab>") 'copilot-accept-completion)
-  (define-key copilot-completion-map (kbd "TAB") 'copilot-accept-completion)
-#+end_src
-#+end_comment
 * Development
 ** Languages
 *** Python

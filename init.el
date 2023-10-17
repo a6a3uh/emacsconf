@@ -275,27 +275,6 @@
 (use-package evil-textobj-tree-sitter
   :straight t)
 
-(use-package hydra
-  :defer t)
-
-(defhydra hydra-text-scale (:timeout 4)
-  "scale text"
-  ("j" my-org-mode-scale-text-increase "in")
-  ("k" my-org-mode-scale-text-decrease "out")
-  ("f" nil "finished" :exit t))
-
-(rune/leader-keys
-  "ts" '(hydra-text-scale/body :which-key "scale text"))
-
-(defhydra hydra-latex-scale (:timeout 4)
-  "scale latex"
-  ("j" my-org-mode-scale-latex-increase "in")
-  ("k" my-org-mode-scale-latex-decrease "out")
-  ("f" nil "finished" :exit t))
-
-(rune/leader-keys
-  "tl" '(hydra-latex-scale/body :which-key "scale LaTeX"))
-
 (use-package projectile
   :diminish projectile-mode
   :config (projectile-mode +1)
@@ -386,7 +365,7 @@
 (setq org-latex-src-block-backend 'engraved)
 
 (require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 
 ;; (defun jupyter-julia-trim-latex (orig-fun data)
   ;; (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
