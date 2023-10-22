@@ -480,6 +480,14 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
 ** LaTeX
 This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
+  (use-package tex
+    :straight auctex)
+  (use-package cdlatex)
+  (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+  (add-hook 'latex-mode-hook #'turn-on-cdlatex)   ; with Emacs latex mode
+#+end_src
+
+#+begin_src emacs-lisp
   (use-package engrave-faces)
   (setq org-latex-src-block-backend 'engraved)
 #+end_src

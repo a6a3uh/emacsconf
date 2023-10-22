@@ -361,6 +361,12 @@
         org-roam-ui-update-on-save t
         org-roam-ui-open-on-start t))
 
+(use-package tex
+  :straight auctex)
+(use-package cdlatex)
+(add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+(add-hook 'latex-mode-hook #'turn-on-cdlatex)   ; with Emacs latex mode
+
 (use-package engrave-faces)
 (setq org-latex-src-block-backend 'engraved)
 
