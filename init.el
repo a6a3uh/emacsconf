@@ -33,10 +33,6 @@
 (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
 (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 
-(use-package direnv
-  :config
-  (direnv-mode))
-
 (use-package rg)
 
 (setq-default buffer-file-coding-system 'utf-8)
@@ -169,7 +165,6 @@
     "p" '(consult-projectile :which-key "select projects")
     "b" '(consult-buffer :which-key "select buffer")
     "s" '(:ignore t :which-key "search")
-    "sr" '(my/org-roam-rg-search :which-key "search roam files")
     "w" '(ace-window :which-key "windows")))
 
 ;; Previews stuff and plays nicely with vertico or similar
@@ -177,13 +172,6 @@
   :general
   ("M-y" 'consult-yank-from-kill-ring
    "C-x b" 'consult-buffer))
-
-(defun my/org-roam-rg-search ()
-  "Search org-roam directory using consult-ripgrep. With live-preview."
-  (interactive)
-  (let ((consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS"))
-    (consult-ripgrep org-roam-directory)))
-(global-set-key (kbd "C-c rr") 'my/org-roam-rg-search)
 
 (use-package embark-consult)
 
@@ -351,16 +339,6 @@
     (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 
-(use-package org-roam-ui
-  :straight
-  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
-
 (use-package tex
   :straight auctex)
 (use-package cdlatex)
@@ -490,32 +468,10 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(when (equal system-type 'gnu/linux)
-  (use-package vterm))
-
 (use-package eshell-git-prompt)
 (use-package eshell
   :config
   (eshell-git-prompt-use-theme 'powerline))
-
-(use-package pdf-tools
-  :config
-  (pdf-tools-install)
-  )
-(add-hook 'pdf-view-mode-hook (blink-cursor-mode -1))
-
-(use-package org-roam
-  :straight t
-  :custom
-  (org-roam-directory (concat org-path "/roam"))
-  (org-roam-completion-everywhere t)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point))
-  :config
-  (org-roam-setup))
 
 (use-package citar
   :after oc
@@ -525,7 +481,6 @@
   :custom
   (citar-bibliography my/bib-files)
   (citar-library-paths my/pdf-files)
-  (citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
@@ -536,8 +491,6 @@
   )
 
 (use-package org-ref)
-
-(use-package org-roam-bibtex)
 
 (use-package djvu)
 

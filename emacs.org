@@ -49,11 +49,6 @@
     (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 #+end_src
 
-#+begin_src emacs-lisp
-  (use-package direnv
-    :config
-    (direnv-mode))
-#+end_src
 * Search
 #+begin_src emacs-lisp
   (use-package rg)
@@ -231,9 +226,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
       "p" '(consult-projectile :which-key "select projects")
       "b" '(consult-buffer :which-key "select buffer")
       "s" '(:ignore t :which-key "search")
-      "sr" '(my/org-roam-rg-search :which-key "search roam files")
       "w" '(ace-window :which-key "windows")))
-
 #+end_src
 
 
@@ -243,15 +236,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     :general
     ("M-y" 'consult-yank-from-kill-ring
      "C-x b" 'consult-buffer))
-#+end_src
-
-#+begin_src emacs-lisp
-  (defun my/org-roam-rg-search ()
-    "Search org-roam directory using consult-ripgrep. With live-preview."
-    (interactive)
-    (let ((consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS"))
-      (consult-ripgrep org-roam-directory)))
-  (global-set-key (kbd "C-c rr") 'my/org-roam-rg-search)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -465,18 +449,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
   (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 #+end_src
 
-** Roam
-#+begin_src emacs-lisp
-  (use-package org-roam-ui
-    :straight
-    (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-    :after org-roam
-    :config
-    (setq org-roam-ui-sync-theme t
-          org-roam-ui-follow t
-          org-roam-ui-update-on-save t
-          org-roam-ui-open-on-start t))
-#+end_src
 ** LaTeX
 This is for coloring exported code using Emacs native code coloring
 #+begin_src emacs-lisp
@@ -666,7 +638,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     (company-idle-delay 0.0))
 #+end_src
 
-# Commented out
 #+begin_src emacs-lisp :tangle no
   (use-package company-box
     :hook (company-mode . company-box-mode))
@@ -701,11 +672,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 #+end_src
 #+end_comment
 * Terminal
-** VTerm
-#+begin_src emacs-lisp
-  (when (equal system-type 'gnu/linux)
-    (use-package vterm))
-#+end_src
 ** EShell
 #+begin_src emacs-lisp
   (use-package eshell-git-prompt)
@@ -714,36 +680,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     (eshell-git-prompt-use-theme 'powerline))
 #+end_src
 * Math
-#+begin_comment
-#+begin_src emacs-lisp
-(use-package org-fragtog)
-(add-hook 'org-mode-hook 'org-fragtog-mode)
-#+end_src
-#+end_comment
-
-#+begin_src emacs-lisp
-  (use-package pdf-tools
-    :config
-    (pdf-tools-install)
-    )
-  (add-hook 'pdf-view-mode-hook (blink-cursor-mode -1))
-#+end_src
-
-#+begin_src emacs-lisp
-  (use-package org-roam
-    :straight t
-    :custom
-    (org-roam-directory (concat org-path "/roam"))
-    (org-roam-completion-everywhere t)
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-           ("C-c n f" . org-roam-node-find)
-           ("C-c n i" . org-roam-node-insert)
-           :map org-mode-map
-           ("C-M-i" . completion-at-point))
-    :config
-    (org-roam-setup))
-#+end_src
-
 #+begin_src emacs-lisp
   (use-package citar
     :after oc
@@ -753,7 +689,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
     :custom
     (citar-bibliography my/bib-files)
     (citar-library-paths my/pdf-files)
-    (citar-notes-paths (list (concat org-path "/roam/references")))
     (citar-file-extensions '("pdf" "org" "md"))
     (org-cite-insert-processor 'citar)
     (org-cite-follow-processor 'citar)
@@ -766,10 +701,6 @@ This is to fix issue with Symbolics.jl wrapping multiline LaTeX with dollars.
 
 #+begin_src emacs-lisp
   (use-package org-ref)
-#+end_src
-
-#+begin_src emacs-lisp
-  (use-package org-roam-bibtex)
 #+end_src
 
 #+begin_src emacs-lisp
