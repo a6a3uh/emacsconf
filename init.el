@@ -22,17 +22,6 @@
 (when (not (eq system-type 'windows-nt))
   (exec-path-from-shell-initialize))
 
-(cl-case system-type
-  ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
-                    org-path "~/org"
-                    root-path "/snap/bin/root"))
-  ('windows-nt (setq yadisk-path "Z:"
-                     org-path (concat yadisk-path "/org")
-                     root-path "C:\\root_v6.28.00\\bin\\root.exe")))
-
-(setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
-(setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
-
 (use-package rg)
 
 (setq-default buffer-file-coding-system 'utf-8)
@@ -479,15 +468,12 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (citar-bibliography my/bib-files)
-  (citar-library-paths my/pdf-files)
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
   (org-cite-activate-processor 'citar)
   (org-cite-export-processors '((latex biblatex) (t csl)))
   (org-support-shift-select t)
-  (org-cite-global-bibliography my/bib-files)
   )
 
 (use-package org-ref)
