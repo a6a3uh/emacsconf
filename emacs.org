@@ -144,6 +144,7 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     :init
     (all-the-icons-completion-mode))
 #+end_src
+
 * Embark
 #+begin_src emacs-lisp
   (use-package embark
@@ -211,7 +212,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
       "p" '(consult-projectile :which-key "select projects")
       "b" '(consult-buffer :which-key "select buffer")
       "s" '(:ignore t :which-key "search")
-      "w" '(ace-window :which-key "windows")))
 #+end_src
 
 
@@ -284,11 +284,6 @@ This will make Ctrl-TAB do the same Alt-TAB doing for completion in jupyter sess
     (text-mode . mixed-pitch-mode))
 #+end_src
 * Windows
-#+begin_src emacs-lisp
-  (use-package ace-window
-    :straight t)
-  (setq aw-dispatch-always t)
-#+end_src
 #+begin_src emacs-lisp
 (use-package writeroom-mode)
 #+end_src

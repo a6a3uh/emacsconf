@@ -154,7 +154,6 @@
     "p" '(consult-projectile :which-key "select projects")
     "b" '(consult-buffer :which-key "select buffer")
     "s" '(:ignore t :which-key "search")
-    "w" '(ace-window :which-key "windows")))
 
 ;; Previews stuff and plays nicely with vertico or similar
 (use-package consult
@@ -205,10 +204,6 @@
   :hook
   ;; If you want it in all text modes:
   (text-mode . mixed-pitch-mode))
-
-(use-package ace-window
-  :straight t)
-(setq aw-dispatch-always t)
 
 (use-package writeroom-mode)
 
