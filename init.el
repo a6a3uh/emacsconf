@@ -1,41 +1,71 @@
-(defvar bootstrap-version)
-(setq straight-repository-branch "develop")
-(let ((bootstrap-file
-       (expand-file-name "straight/repos/straight.el/bootstrap.el"
-                         user-emacs-directory))
-      (bootstrap-vesrion 5))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+(defvar elpaca-installer-version 0.6)
+(defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
+(defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
+(defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
+(defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
+                              :ref nil
+                              :files (:defaults "elpaca-test.el" (:exclude "extensions"))
+                              :build (:not elpaca--activate-package)))
+(let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
+       (build (expand-file-name "elpaca/" elpaca-builds-directory))
+       (order (cdr elpaca-order))
+       (default-directory repo))
+  (add-to-list 'load-path (if (file-exists-p build) build repo))
+  (unless (file-exists-p repo)
+    (make-directory repo t)
+    (when (< emacs-major-version 28) (require 'subr-x))
+    (condition-case-unless-debug err
+        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                 ((zerop (call-process "git" nil buffer t "clone"
+                                       (plist-get order :repo) repo)))
+                 ((zerop (call-process "git" nil buffer t "checkout"
+                                       (or (plist-get order :ref) "--"))))
+                 (emacs (concat invocation-directory invocation-name))
+                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                 ((require 'elpaca))
+                 ((elpaca-generate-autoloads "elpaca" repo)))
+            (progn (message "%s" (buffer-string)) (kill-buffer buffer))
+          (error "%s" (with-current-buffer buffer (buffer-string))))
+      ((error) (warn "%s" err) (delete-directory repo 'recursive))))
+  (unless (require 'elpaca-autoloads nil t)
+    (require 'elpaca)
+    (elpaca-generate-autoloads "elpaca" repo)
+    (load "./elpaca-autoloads")))
+(add-hook 'after-init-hook #'elpaca-process-queues)
+(elpaca `(,@elpaca-order))
 
-(straight-use-package 'use-package)
-(setq straight-use-package-by-default t)
+(setq package-enable-at-startup nil)
+
+;; Install use-package support
+(elpaca elpaca-use-package
+  ;; Enable :elpaca use-package keyword.
+  (elpaca-use-package-mode)
+  ;; Assume :elpaca t unless otherwise specified.
+  (setq elpaca-use-package-by-default t))
+
+(elpaca-wait)
 
 (use-package no-littering)
 
-(use-package exec-path-from-shell)
-(when (not (eq system-type 'windows-nt))
-  (exec-path-from-shell-initialize))
+(use-package exec-path-from-shell
+  :init
+  (when (not (eq system-type 'windows-nt))
+    (exec-path-from-shell-initialize))
+  )
 
-(cl-case system-type
-  ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
-                    org-path "~/org"
-                    root-path "/snap/bin/root"))
-  ('windows-nt (setq yadisk-path "Z:"
-                     org-path (concat yadisk-path "/org")
-                     root-path "C:\\root_v6.28.00\\bin\\root.exe")))
 
-(setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
-(setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 
-(use-package direnv
-  :config
-  (direnv-mode))
+;; (cl-case system-type
+  ;; ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
+                    ;; org-path "~/org"
+                    ;; root-path "/snap/bin/root"))
+  ;; ('windows-nt (setq yadisk-path "Z:"
+                     ;; org-path (concat yadisk-path "/org")
+                     ;; root-path "C:\\root_v6.28.00\\bin\\root.exe")))
+;; 
+;; (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
+;; (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
 
 (use-package rg)
 
@@ -81,10 +111,46 @@
 (setq global-auto-revert-none-file-buffers t)
 
 ;; Load customizable theme
-(load-theme 'modus-operandi t)
+;; (load-theme 'modus-operandi t)
 
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
+(use-package lambda-themes
+  :elpaca (:type git :host github :repo "lambda-emacs/lambda-themes") 
+  :custom
+  (lambda-themes-set-italic-comments t)
+  (lambda-themes-set-italic-keywords t)
+  (lambda-themes-set-variable-pitch t) 
+  :config
+  ;; load preferred theme 
+  (load-theme 'lambda-light)
+  ;; (load-theme 'modus-vivendi)
+  )
+
+(use-package lambda-line
+  :elpaca (:type git :host github :repo "lambda-emacs/lambda-line") 
+  :custom
+  (lambda-line-icon-time t) ;; requires ClockFace font (see below)
+  (lambda-line-clockface-update-fontset "ClockFaceRect") ;; set clock icon
+  (lambda-line-position 'top) ;; Set position of status-line 
+  (lambda-line-abbrev t) ;; abbreviate major modes
+  (lambda-line-hspace "  ")  ;; add some cushion
+  (lambda-line-prefix t) ;; use a prefix symbol
+  (lambda-line-prefix-padding nil) ;; no extra space for prefix 
+  (lambda-line-status-invert nil)  ;; no invert colors
+  (lambda-line-gui-ro-symbol  " ⨂") ;; symbols
+  (lambda-line-gui-mod-symbol " ⬤") 
+  (lambda-line-gui-rw-symbol  " ◯") 
+  (lambda-line-space-top +.50)  ;; padding on top and bottom of line
+  (lambda-line-space-bottom -.50)
+  (lambda-line-symbol-position 0.1) ;; adjust the vertical placement of symbol
+  :config
+  ;; activate lambda-line 
+  (lambda-line-mode) 
+  ;; set divider line in footer
+  (when (eq lambda-line-position 'top)
+    (setq-default mode-line-format (list "%_"))
+    (setq mode-line-format (list "%_"))))
 
 (use-package vertico
   :custom
@@ -106,14 +172,13 @@
 (use-package marginalia
   :config (marginalia-mode))
 
-(use-package all-the-icons-completion
-  :after (marginalia all-the-icons)
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init
-  (all-the-icons-completion-mode))
+;(use-package all-the-icons-completion
+;  :after (marginalia all-the-icons)
+;  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+;  :init
+;  (all-the-icons-completion-mode))
 
 (use-package embark
-  :straight t
   :bind
   (("C-." . embark-act)
    ("M-." . embark-dwim)
@@ -169,21 +234,20 @@
     "p" '(consult-projectile :which-key "select projects")
     "b" '(consult-buffer :which-key "select buffer")
     "s" '(:ignore t :which-key "search")
-    "sr" '(my/org-roam-rg-search :which-key "search roam files")
-    "w" '(ace-window :which-key "windows")))
+    ;; "sr" '(my/org-roam-rg-search :which-key "search roam files")
+   ; "w" '(ace-window :which-key "windows")
+   ))
 
 ;; Previews stuff and plays nicely with vertico or similar
 (use-package consult
-  :general
-  ("M-y" 'consult-yank-from-kill-ring
-   "C-x b" 'consult-buffer))
+  )
 
-(defun my/org-roam-rg-search ()
-  "Search org-roam directory using consult-ripgrep. With live-preview."
-  (interactive)
-  (let ((consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS"))
-    (consult-ripgrep org-roam-directory)))
-(global-set-key (kbd "C-c rr") 'my/org-roam-rg-search)
+;(defun my/org-roam-rg-search ()
+;  "Search org-roam directory using consult-ripgrep. With live-preview."
+;  (interactive)
+;  (let ((consult-ripgrep-command "rg --null --ignore-case --type org --line-buffered --color=always --max-columns=500 --no-heading --line-number . -e ARG OPTS"))
+;    (consult-ripgrep org-roam-directory)))
+;; (global-set-key (kbd "C-c rr") 'my/org-roam-rg-search)
 
 (use-package embark-consult)
 
@@ -196,42 +260,44 @@
                  #'completion--in-region)
                args)))
 
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1)
-  :custom ((doom-modeline-height 15)))
+;(use-package doom-modeline
+;  :straight t
+;  :init (doom-modeline-mode 1)
+;  :custom ((doom-modeline-height 15)))
 
-(use-package all-the-icons
-  :if (display-graphic-p))
+;(use-package all-the-icons
+;  :if (display-graphic-p))
 
 (use-package dired-single)
 
-(use-package dired
-  :after evil-collection
-  :straight nil
-  :config
-  (evil-collection-define-key 'normal 'dired-mode-map
-    "h" 'dired-single-up-directory
-    "l" 'dired-single-buffer))
+;(use-package dired
+ ; :after evil-collection
+;  :straight nil
+  ;:config
+  ;(evil-collection-define-key 'normal 'dired-mode-map
+  ;  "h" 'dired-single-up-directory
+  ;  "l" 'dired-single-buffer)
+;  )
 
-(use-package all-the-icons-dired)
-(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
+;(use-package all-the-icons-dired)
+;(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
 
 (use-package dired-hide-dotfiles
   :after evil-collection
   :hook (dired-mode . dired-hide-dotfiles-mode)
   :config
   (evil-collection-define-key 'normal 'dired-mode-map
-    "H" 'dired-hide-dotfiles-mode))
+    "H" 'dired-hide-dotfiles-mode)
+ )
 
-(use-package mixed-pitch
-  :hook
-  ;; If you want it in all text modes:
-  (text-mode . mixed-pitch-mode))
+;(use-package mixed-pitch
+;  :hook
+;  ;; If you want it in all text modes:
+;  (text-mode . mixed-pitch-mode))
 
-(use-package ace-window
-  :straight t)
-(setq aw-dispatch-always t)
+;(use-package ace-window
+;  :straight t)
+;(setq aw-dispatch-always t)
 
 (use-package writeroom-mode)
 
@@ -272,30 +338,32 @@
   :config
   (evil-collection-init))
 
-(use-package evil-textobj-tree-sitter
-  :straight t)
+;(use-package evil-textobj-tree-sitter
+;  :straight t)
 
-(use-package projectile
-  :diminish projectile-mode
-  :config (projectile-mode +1)
-  :bind-keymap
-  ("C-c p" . projectile-command-map)
-  :init
-  (when (file-directory-p "~/code")
-    (setq projectile-project-search-project-path '("~/code")))
-  (setq projectile-switch-project-action #'projectile-dired))
+;(use-package projectile
+;  :diminish projectile-mode
+;  :config (projectile-mode +1)
+;  :bind-keymap
+;  ("C-c p" . projectile-command-map)
+;  :init
+;  (when (file-directory-p "~/code")
+;    (setq projectile-project-search-project-path '("~/code")))
+;  (setq projectile-switch-project-action #'projectile-dired))
 
-(use-package consult-projectile
-  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
+;(use-package consult-projectile
+;  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 
-(when (equal system-type 'gnu/linux)
-  (use-package direnv
-     :config
-     (direnv-mode)))
+;(when (equal system-type 'gnu/linux)
+;  (use-package direnv
+;     :config
+;     (direnv-mode)))
 
 (use-package dirvish
   :after evil-collection
   :init (dirvish-override-dired-mode)
+  :custom
+  (dirvish-preview-disabled-exts '("org"))
   :config
   (evil-collection-define-key 'normal 'dirvish-mode-map
     "q" 'dirvish-quit)
@@ -322,14 +390,16 @@
   )
 
 (use-package org
+  :defer t
+  :elpaca nil
   :hook (org-mode . my/org-mode-setup)
   ;; :custom
   ;; (org-latex-compiler "xelatex")
   :config
   (require 'org-inlinetask)
   (setq org-ellipsis " ▾"
-        ;; org-hide-emphasis-markers t
-        org-src-fontify-natively t))
+	;; org-hide-emphasis-markers t
+	org-src-fontify-natively t))
 
 ;; Don't request confirm when evaluating certaing languages
 (defun my/org-confirm-babel-evaluate (lang body)
@@ -345,24 +415,44 @@
 (setq org-confirm-babel-evaluate 'my/org-confirm-babel-evaluate)
 
 (defun my/org-babel-tangle-config ()
-(when (string-equal (buffer-file-name)
-                    (expand-file-name "~/.emacs.d/emacs.org"))
-  (let ((org-confirm-babel-evaluate nil))
-    (org-babel-tangle))))
+  (when (string-equal (buffer-file-name)
+                      (expand-file-name "~/.emacs.d/emacs.org"))
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
 (add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'my/org-babel-tangle-config)))
 
-(use-package org-roam-ui
-  :straight
-  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
-  :after org-roam
-  :config
-  (setq org-roam-ui-sync-theme t
-        org-roam-ui-follow t
-        org-roam-ui-update-on-save t
-        org-roam-ui-open-on-start t))
+;(use-package org-roam-ui
+;  :straight
+;  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+;  :after org-roam
+;  :config
+;  (setq org-roam-ui-sync-theme t
+;        org-roam-ui-follow t
+;        org-roam-ui-update-on-save t
+;        org-roam-ui-open-on-start t))
 
-(use-package tex
-  :straight auctex)
+(use-package auctex
+  :elpaca  (auctex :pre-build (("./autogen.sh")
+                               ("./configure" "--without-texmf-dir" "--with-lispdir=.")
+                               ("make")))
+  :mode (("\\.tex\\'" . LaTeX-mode)
+         ("\\.tex\\.erb\\'" . LaTeX-mode)
+         ("\\.etx\\'" . LaTeX-mode))
+  :hook (text-mode-hook . (lambda ()
+			    (load "auctex.el")
+			    (setq TeX-command-extra-options "-shell-escape")))
+  :config
+  (setq-default TeX-global-PDF-mode 1)
+  (setq-default  preview-scale-function 1.5)
+  (setq TeX-auto-save t
+        TeX-parse-self t
+        default-truncate-lines t
+        TeX-save-query nil
+        TeX-source-correlate-method 'synctex)
+  (add-hook 'TeX-mode-hook
+            (lambda ()
+              (setq TeX-command-extra-options "-shell-escape"))))
+
 (use-package cdlatex)
 (add-hook 'LaTeX-mode-hook #'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 (add-hook 'latex-mode-hook #'turn-on-cdlatex)   ; with Emacs latex mode
@@ -400,19 +490,36 @@
 
 (custom-set-variables '(python-shell-interpreter "ipython"))
 
-(use-package cern-root-mode
-  :after org
-  :bind (:map c++-mode-map
-             (("C-c C-c" . cern-root-eval-defun)
-              ("C-c C-b" . cern-root-eval-buffer)
-              ("C-c C-l" . cern-root-eval-file)
-              ("C-c C-r" . cern-root-eval-region)))
-  :straight (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
-  :config
-  (setq cern-root-filepath root-path))
-  ;(require 'cern-root-mode)
+;(use-package cern-root-mode
+;  :after org
+;  :bind (:map c++-mode-map
+;             (("C-c C-c" . cern-root-eval-defun)
+;              ("C-c C-b" . cern-root-eval-buffer)
+;              ("C-c C-l" . cern-root-eval-file)
+;              ("C-c C-r" . cern-root-eval-region)))
+;  :straight (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
+;  :config
+;  (setq cern-root-filepath root-path))
+;  ;(require 'cern-root-mode)
 
-(use-package julia-mode)
+(use-package eglot
+    :ensure t
+  :config
+  (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
+  (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
+    )
+
+(use-package eglot-jl
+    :ensure t)
+
+(use-package julia-mode
+    :ensure t
+    :mode "\\.jl\\'"
+    :interpreter "julia"
+    :config
+    (eglot-jl-init)
+    ;; Specify the hook that connects =eglot=
+    :hook (julia-mode . eglot-ensure))
 
 (use-package  julia-repl)
 (add-hook 'julia-mode-hook 'julia-repl-mode) ;; always use minor mode
@@ -420,48 +527,54 @@
 (add-hook 'julia-mode-hook 'company-quickhelp-mode)
 ;; (add-hook 'julia-mode-hook 'ts-fold-indicators-mode)
 
-(use-package eglot-jl)
-
-(use-package lsp-julia
-  :config
-  (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
+;(use-package lsp-julia
+;  :config
+;  (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
 
 (use-package cmake-mode)
 
-(use-package yasnippet)
+;(use-package yasnippet)
 
-(use-package eglot)
+;  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
 
-;; (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
-;; (add-hook 'c-mode-hook 'eglot-ensure)
-;; (add-hook 'c++-mode-hook 'eglot-ensure)
-(add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
+;(add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
+;(add-hook 'c-mode-hook 'eglot-ensure)
+;(add-hook 'c++-mode-hook 'eglot-ensure)
+;(add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
 
-(add-hook 'python-mode-hook 'eglot-ensure)
-(add-hook 'julia-mode-hook 'eglot-ensure)
-(add-hook 'julia-mode-hook 'eglot-jl-init)
+;(add-hook 'python-mode-hook 'eglot-ensure)
+;(add-hook 'julia-mode-hook 'eglot-ensure)
+;(add-hook 'julia-mode-hook 'eglot-jl-init)
 
-(use-package consult-eglot)
+(use-package consult-eglot
+  :after
+  eglot
+  consult
+  )
 
-(use-package lsp-mode)
-(use-package dap-mode)
 
-(use-package consult-lsp)
+;(use-package lsp-mode)
+;(use-package dap-mode)
 
-(which-key-mode)
-(add-hook 'c-mode-hook 'lsp)
-(add-hook 'c++-mode-hook 'lsp)
+;(use-package consult-lsp)
+
+;(which-key-mode)
+;(add-hook 'c-mode-hook 'lsp)
+;(add-hook 'c++-mode-hook 'lsp)
 
 ;; (add-hook 'julia-mode-hook 'lsp)
 
-(with-eval-after-load 'lsp-mode
-  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
-  (require 'dap-cpptools)
-  (yas-global-mode))
+;(with-eval-after-load 'lsp-mode
+;  (add-hook 'lsp-mode-hook #'lsp-enable-which-key-integration)
+;  (require 'dap-cpptools)
+;  ;(yas-global-mode)
+;  )
 
-(use-package jupyter)
+(use-package jupyter
+  :after org
+  )
 
-(with-eval-after-load 'org
+(with-eval-after-load 'jupyter
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((emacs-lisp . t)
@@ -473,12 +586,11 @@
      (dot . t)
      (jupyter . t)
      ))
+  (org-babel-jupyter-override-src-block "julia")
   (push '("conf-unix" . conf-unix) org-src-lang-modes) )
 
-(org-babel-jupyter-override-src-block "julia")
 
 (use-package company
-  :straight t
   :bind (:map company-active-map
               ("<tab>" . company-complete-selection))
   :custom
@@ -490,32 +602,34 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-(when (equal system-type 'gnu/linux)
-  (use-package vterm))
+;(when (equal system-type 'gnu/linux)
+;  (use-package vterm))
 
-(use-package eshell-git-prompt)
-(use-package eshell
-  :config
-  (eshell-git-prompt-use-theme 'powerline))
+;(use-package eshell-git-prompt)
 
-(use-package pdf-tools
-  :config
-  (pdf-tools-install)
-  )
+;(use-package eshell
+  ;:config
+  ;(eshell-git-prompt-use-theme 'powerline)
+;  )
+
+;; (use-package pdf-tools
+ ;; :config
+ ;; (pdf-tools-install)
+ ;; )
+
 (add-hook 'pdf-view-mode-hook (blink-cursor-mode -1))
 
-(use-package org-roam
-  :straight t
-  :custom
-  (org-roam-directory (concat org-path "/roam"))
-  (org-roam-completion-everywhere t)
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-         ("C-c n f" . org-roam-node-find)
-         ("C-c n i" . org-roam-node-insert)
-         :map org-mode-map
-         ("C-M-i" . completion-at-point))
-  :config
-  (org-roam-setup))
+;;(use-package org-roam
+;;  :custom
+;;  (org-roam-directory (concat org-path "/roam"))
+;;  (org-roam-completion-everywhere t)
+;;  :bind (("C-c n l" . org-roam-buffer-toggle)
+;;         ("C-c n f" . org-roam-node-find)
+;;         ("C-c n i" . org-roam-node-insert)
+;;         :map org-mode-map
+;;         ("C-M-i" . completion-at-point))
+;;  :config
+;;  (org-roam-setup))
 
 (use-package citar
   :after oc
@@ -523,9 +637,9 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  (citar-bibliography my/bib-files)
-  (citar-library-paths my/pdf-files)
-  (citar-notes-paths (list (concat org-path "/roam/references")))
+  ;; (citar-bibliography my/bib-files)
+  ;; (citar-library-paths my/pdf-files)
+  ;;(citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
   (org-cite-follow-processor 'citar)
@@ -535,11 +649,9 @@
   (org-cite-global-bibliography my/bib-files)
   )
 
-(use-package org-ref)
+;(use-package org-ref)
 
-(use-package org-roam-bibtex)
-
-(use-package djvu)
+;;(use-package org-roam-bibtex)
 
 (setq
  org-startup-with-latex-preview t
