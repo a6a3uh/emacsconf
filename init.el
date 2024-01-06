@@ -115,6 +115,7 @@
 
 (set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
+
 (use-package lambda-themes
   :elpaca (:type git :host github :repo "lambda-emacs/lambda-themes") 
   :custom
@@ -461,12 +462,12 @@
 (setq org-latex-src-block-backend 'engraved)
 
 (require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.8))
 
-;; (defun jupyter-julia-trim-latex (orig-fun data)
-  ;; (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
+(defun jupyter-julia-trim-latex (orig-fun data)
+  (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
 
-;; (advice-add 'jupyter-org--parse-latex-element :around #'jupyter-julia-trim-latex)
+(advice-add 'jupyter-org--parse-latex-element :around #'jupyter-julia-trim-latex)
 
 (require 'org-tempo)
 
@@ -649,7 +650,7 @@
   (org-cite-global-bibliography my/bib-files)
   )
 
-;(use-package org-ref)
+(use-package org-ref)
 
 ;;(use-package org-roam-bibtex)
 
