@@ -57,15 +57,15 @@
 
 
 ;; (cl-case system-type
-  ;; ('gnu/linux (setq yadisk-path "~/Yandex.Disk"
+  ;; ('gnu/linux (setq yadisk-path "~/yadisk"
                     ;; org-path "~/org"
                     ;; root-path "/snap/bin/root"))
   ;; ('windows-nt (setq yadisk-path "Z:"
                      ;; org-path (concat yadisk-path "/org")
                      ;; root-path "C:\\root_v6.28.00\\bin\\root.exe")))
 ;; 
-;; (setq my/bib-files (list (concat yadisk-path "/papers/phd.bib")))
-;; (setq my/pdf-files (list (concat yadisk-path "/papers/papers")))
+(setq my/bib-files (list (concat "~/yadisk" "/papers/phd.bib")))
+(setq my/pdf-files (list (concat "~/yadisk" "/papers/papers")))
 
 (use-package rg)
 
@@ -638,8 +638,8 @@
          :map minibuffer-local-map
          ("M-b" . citar-insert-preset))
   :custom
-  ;; (citar-bibliography my/bib-files)
-  ;; (citar-library-paths my/pdf-files)
+  (citar-bibliography my/bib-files)
+  (citar-library-paths my/pdf-files)
   ;;(citar-notes-paths (list (concat org-path "/roam/references")))
   (citar-file-extensions '("pdf" "org" "md"))
   (org-cite-insert-processor 'citar)
@@ -657,3 +657,13 @@
 (setq
  org-startup-with-latex-preview t
  )
+
+(use-package org-tufte
+  :elpaca (:type git :host github :repo "Zilong-Li/org-tufte") 
+  :ensure nil
+  :init (add-to-list 'load-path "PATH*")
+  :config
+  (require 'org-tufte)
+  (setq org-tufte-htmlize-code t)
+  (setq org-tufte-embed-images t)
+  )
