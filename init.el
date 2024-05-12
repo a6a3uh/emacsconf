@@ -1,9 +1,9 @@
-(defvar elpaca-installer-version 0.6)
+(defvar elpaca-installer-version 0.7)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil
+                              :ref nil :depth 1
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -16,8 +16,10 @@
     (when (< emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
         (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (call-process "git" nil buffer t "clone"
-                                       (plist-get order :repo) repo)))
+                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                 ,@(when-let ((depth (plist-get order :depth)))
+                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                 ,(plist-get order :repo) ,repo))))
                  ((zerop (call-process "git" nil buffer t "checkout"
                                        (or (plist-get order :ref) "--"))))
                  (emacs (concat invocation-directory invocation-name))
@@ -34,6 +36,9 @@
     (load "./elpaca-autoloads")))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
+
+
+
 
 (setq package-enable-at-startup nil)
 
@@ -117,7 +122,7 @@
 (set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
 
 (use-package lambda-themes
-  :elpaca (:type git :host github :repo "lambda-emacs/lambda-themes") 
+  :ensure (:type git :host github :repo "lambda-emacs/lambda-themes") 
   :custom
   (lambda-themes-set-italic-comments t)
   (lambda-themes-set-italic-keywords t)
@@ -129,7 +134,7 @@
   )
 
 (use-package lambda-line
-  :elpaca (:type git :host github :repo "lambda-emacs/lambda-line") 
+  :ensure (:type git :host github :repo "lambda-emacs/lambda-line") 
   :custom
   (lambda-line-icon-time t) ;; requires ClockFace font (see below)
   (lambda-line-clockface-update-fontset "ClockFaceRect") ;; set clock icon
@@ -392,7 +397,7 @@
 
 (use-package org
   :defer t
-  :elpaca nil
+  :ensure nil
   :hook (org-mode . my/org-mode-setup)
   ;; :custom
   ;; (org-latex-compiler "xelatex")
@@ -433,7 +438,7 @@
 ;        org-roam-ui-open-on-start t))
 
 (use-package auctex
-  :elpaca  (auctex :pre-build (("./autogen.sh")
+  :ensure  (auctex :pre-build (("./autogen.sh")
                                ("./configure" "--without-texmf-dir" "--with-lispdir=.")
                                ("make")))
   :mode (("\\.tex\\'" . LaTeX-mode)
@@ -651,6 +656,10 @@
   )
 
 (use-package org-ref)
+(use-package jsonrpc)
+(use-package transient)
+(use-package eldoc
+  :after elpaca)
 
 ;;(use-package org-roam-bibtex)
 
@@ -659,7 +668,7 @@
  )
 
 (use-package org-tufte
-  :elpaca (:type git :host github :repo "Zilong-Li/org-tufte") 
+  :ensure (:type git :host github :repo "Zilong-Li/org-tufte") 
   :ensure nil
   :init (add-to-list 'load-path "PATH*")
   :config
