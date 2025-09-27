@@ -1,9 +1,9 @@
-(defvar elpaca-installer-version 0.7)
+(defvar elpaca-installer-version 0.11)
 (defvar elpaca-directory (expand-file-name "elpaca/" user-emacs-directory))
 (defvar elpaca-builds-directory (expand-file-name "builds/" elpaca-directory))
 (defvar elpaca-repos-directory (expand-file-name "repos/" elpaca-directory))
 (defvar elpaca-order '(elpaca :repo "https://github.com/progfolio/elpaca.git"
-                              :ref nil :depth 1
+                              :ref nil :depth 1 :inherit ignore
                               :files (:defaults "elpaca-test.el" (:exclude "extensions"))
                               :build (:not elpaca--activate-package)))
 (let* ((repo  (expand-file-name "elpaca/" elpaca-repos-directory))
@@ -13,34 +13,31 @@
   (add-to-list 'load-path (if (file-exists-p build) build repo))
   (unless (file-exists-p repo)
     (make-directory repo t)
-    (when (< emacs-major-version 28) (require 'subr-x))
+    (when (<= emacs-major-version 28) (require 'subr-x))
     (condition-case-unless-debug err
-        (if-let ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
-                 ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
-                                                 ,@(when-let ((depth (plist-get order :depth)))
-                                                     (list (format "--depth=%d" depth) "--no-single-branch"))
-                                                 ,(plist-get order :repo) ,repo))))
-                 ((zerop (call-process "git" nil buffer t "checkout"
-                                       (or (plist-get order :ref) "--"))))
-                 (emacs (concat invocation-directory invocation-name))
-                 ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
-                                       "--eval" "(byte-recompile-directory \".\" 0 'force)")))
-                 ((require 'elpaca))
-                 ((elpaca-generate-autoloads "elpaca" repo)))
+        (if-let* ((buffer (pop-to-buffer-same-window "*elpaca-bootstrap*"))
+                  ((zerop (apply #'call-process `("git" nil ,buffer t "clone"
+                                                  ,@(when-let* ((depth (plist-get order :depth)))
+                                                      (list (format "--depth=%d" depth) "--no-single-branch"))
+                                                  ,(plist-get order :repo) ,repo))))
+                  ((zerop (call-process "git" nil buffer t "checkout"
+                                        (or (plist-get order :ref) "--"))))
+                  (emacs (concat invocation-directory invocation-name))
+                  ((zerop (call-process emacs nil buffer nil "-Q" "-L" "." "--batch"
+                                        "--eval" "(byte-recompile-directory \".\" 0 'force)")))
+                  ((require 'elpaca))
+                  ((elpaca-generate-autoloads "elpaca" repo)))
             (progn (message "%s" (buffer-string)) (kill-buffer buffer))
           (error "%s" (with-current-buffer buffer (buffer-string))))
       ((error) (warn "%s" err) (delete-directory repo 'recursive))))
   (unless (require 'elpaca-autoloads nil t)
     (require 'elpaca)
     (elpaca-generate-autoloads "elpaca" repo)
-    (load "./elpaca-autoloads")))
+    (let ((load-source-file-function nil)) (load "./elpaca-autoloads"))))
 (add-hook 'after-init-hook #'elpaca-process-queues)
 (elpaca `(,@elpaca-order))
 
 
-
-
-(setq package-enable-at-startup nil)
 
 ;; Install use-package support
 (elpaca elpaca-use-package
@@ -57,9 +54,11 @@
   :init
   (when (not (eq system-type 'windows-nt))
     (exec-path-from-shell-initialize))
+  :custom
+  (exec-path-from-shell-variables '("PATH" "CPLUS_INCLUDE_PATH" "LD_LIBRARY_PATH" "MANPATH"))
   )
 
-
+;; (setq exec-path-from-shell-variables '("PATH" "CPLUS_INCLUDE_PATH" "LD_LIBRARY_PATH" "MANPATH"))
 
 ;; (cl-case system-type
   ;; ('gnu/linux (setq yadisk-path "~/yadisk"
@@ -94,13 +93,20 @@
 
 (column-number-mode)
 
-;; Open recent files
-(recentf-mode 1)
+(use-package recentf
+  :ensure nil
+  :config
+  (add-to-list 'recentf-exclude "^/tmp/")
+  :init
+  (recentf-mode 1)
+  :hook
+  ('window-setup-hook . recentf-load-list)
+  )
+  
 
 ;; Save what you entered into minibuffer prompts
 (setq history-length 25)
 (savehist-mode 1)
-(add-to-list 'savehist-additional-variables 'org-ai-openai-api-token)
 ;; Remember and restore the last cursor location of opened files
 (save-place-mode 1)
 
@@ -115,11 +121,8 @@
 ;; Revert Dired and other buffers when files in folder added for example
 (setq global-auto-revert-none-file-buffers t)
 
-;; Load customizable theme
-;; (load-theme 'modus-operandi t)
-
-(set-face-attribute 'default nil :font "JetBrains Mono" :height 150)
-(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 150)
+(set-face-attribute 'default nil :font "JetBrains Mono" :height 120)
+(set-face-attribute 'fixed-pitch nil :font "JetBrains Mono" :height 120)
 
 (use-package lambda-themes
   :ensure (:type git :host github :repo "lambda-emacs/lambda-themes") 
@@ -130,7 +133,7 @@
   :config
   ;; load preferred theme 
   (load-theme 'lambda-light)
-  ;; (load-theme 'modus-vivendi)
+  (load-theme 'modus-operandi)
   )
 
 (use-package lambda-line
@@ -178,12 +181,6 @@
 (use-package marginalia
   :config (marginalia-mode))
 
-;(use-package all-the-icons-completion
-;  :after (marginalia all-the-icons)
-;  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-;  :init
-;  (all-the-icons-completion-mode))
-
 (use-package embark
   :bind
   (("C-." . embark-act)
@@ -213,7 +210,7 @@
   ([remap describe-variable] . helpful-variable)
   ([remap describe-key] .  helpful-key))
 
-;; Suff for key bindings
+;; Stuff for key bindings
 (use-package general
   :after evil
   :config
@@ -230,14 +227,17 @@
   (rune/leader-keys
     "g" '(magit :which-key "magit")
     "t" '(:ignore t :which-key "toggles")
-    "tt" '(consult-theme :which-key "choose-theme")
+    "tt" '(lambda-themes-toggle-theme :which-key "choose-theme")
     "tz" '(writeroom-mode :which-key "zen mode")
     "f" '(:ignore t :which-key "files")
     "ff" '(consult-recent-file :which-key "recent files")
     "fd" '(dired :which-key "dired")
     "fr" '(dirvish :which-key "dirvish")
     "tn" '(display-line-numbers-mode :which-key "line numbers")
-    "p" '(consult-projectile :which-key "select projects")
+    "p" '(:ignore p :which-key "project")
+    "pp" '(consult-projectile-switch-project :which-key "select project")
+    "pf" '(consult-projectile :which-key "select project files")
+    "ps" '(consult-ripgrep :which-key "search project files")
     "b" '(consult-buffer :which-key "select buffer")
     "s" '(:ignore t :which-key "search")
     ;; "sr" '(my/org-roam-rg-search :which-key "search roam files")
@@ -266,28 +266,6 @@
                  #'completion--in-region)
                args)))
 
-;(use-package doom-modeline
-;  :straight t
-;  :init (doom-modeline-mode 1)
-;  :custom ((doom-modeline-height 15)))
-
-;(use-package all-the-icons
-;  :if (display-graphic-p))
-
-(use-package dired-single)
-
-;(use-package dired
- ; :after evil-collection
-;  :straight nil
-  ;:config
-  ;(evil-collection-define-key 'normal 'dired-mode-map
-  ;  "h" 'dired-single-up-directory
-  ;  "l" 'dired-single-buffer)
-;  )
-
-;(use-package all-the-icons-dired)
-;(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
-
 (use-package dired-hide-dotfiles
   :after evil-collection
   :hook (dired-mode . dired-hide-dotfiles-mode)
@@ -295,15 +273,6 @@
   (evil-collection-define-key 'normal 'dired-mode-map
     "H" 'dired-hide-dotfiles-mode)
  )
-
-;(use-package mixed-pitch
-;  :hook
-;  ;; If you want it in all text modes:
-;  (text-mode . mixed-pitch-mode))
-
-;(use-package ace-window
-;  :straight t)
-;(setq aw-dispatch-always t)
 
 (use-package writeroom-mode)
 
@@ -344,26 +313,17 @@
   :config
   (evil-collection-init))
 
-;(use-package evil-textobj-tree-sitter
-;  :straight t)
+(use-package evil-textobj-tree-sitter)
 
-;(use-package projectile
-;  :diminish projectile-mode
-;  :config (projectile-mode +1)
-;  :bind-keymap
-;  ("C-c p" . projectile-command-map)
-;  :init
-;  (when (file-directory-p "~/code")
-;    (setq projectile-project-search-project-path '("~/code")))
-;  (setq projectile-switch-project-action #'projectile-dired))
+(use-package projectile
+ :diminish projectile-mode
+ :config (projectile-mode +1)
+ :bind-keymap
+ ("C-c p" . projectile-command-map)
+ )
 
-;(use-package consult-projectile
-;  :straight (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
-
-;(when (equal system-type 'gnu/linux)
-;  (use-package direnv
-;     :config
-;     (direnv-mode)))
+(use-package consult-projectile
+  :ensure (consult-projectile :type git :host gitlab :repo "OlMon/consult-projectile" :branch "master"))
 
 (use-package dirvish
   :after evil-collection
@@ -381,6 +341,7 @@
             ;; (dired-sort-toggle-or-edit)
             ))
 
+;(use-package git-commit)
 (use-package magit
   :custom
   (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
@@ -393,6 +354,7 @@
   (visual-line-mode 1)
   (setq evil-auto-indent nil)
   (setq org-image-actual-width nil)
+  (setq org-num-skip-unnumbered t)
   )
 
 (use-package org
@@ -400,6 +362,7 @@
   :ensure nil
   :hook (org-mode . my/org-mode-setup)
   ;; :custom
+  ;; (org-num-skip-unnumbered t)
   ;; (org-latex-compiler "xelatex")
   :config
   (require 'org-inlinetask)
@@ -414,7 +377,10 @@
            (string= lang "dot")
            (string= lang "julia")
            (string= lang "jupyter-julia")
+           (string= lang "ein-julia")
+           (string= lang "ein-python")
            (string= lang "latex")
+           (string= lang "octave")
            (string= lang "C++")
            (string= lang "cern-root")
            (string= lang "emacs-lisp"))))
@@ -467,7 +433,7 @@
 (setq org-latex-src-block-backend 'engraved)
 
 (require 'org)
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.8))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
 
 (defun jupyter-julia-trim-latex (orig-fun data)
   (apply orig-fun (list (string-trim data "[ $]+" "[ $]+"))))
@@ -496,24 +462,14 @@
 
 (custom-set-variables '(python-shell-interpreter "ipython"))
 
-;(use-package cern-root-mode
-;  :after org
-;  :bind (:map c++-mode-map
-;             (("C-c C-c" . cern-root-eval-defun)
-;              ("C-c C-b" . cern-root-eval-buffer)
-;              ("C-c C-l" . cern-root-eval-file)
-;              ("C-c C-r" . cern-root-eval-region)))
-;  :straight (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
-;  :config
-;  (setq cern-root-filepath root-path))
-;  ;(require 'cern-root-mode)
-
 (use-package eglot
-    :ensure t
+  :ensure f
   :config
   (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
   (add-to-list 'eglot-server-programs '(python-mode . ("jedi-language-server")))
-    )
+  :custom
+  (eglot-connect-timeout 1200)
+  )
 
 (use-package eglot-jl
     :ensure t)
@@ -539,7 +495,8 @@
 
 (use-package cmake-mode)
 
-;(use-package yasnippet)
+(use-package yasnippet)
+(use-package yasnippet-snippets)
 
 ;  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
 
@@ -576,9 +533,35 @@
 ;  ;(yas-global-mode)
 ;  )
 
+;; (use-package ess)
+;; (defun my-jupyter-api-http-request--ignore-login-error-a
+;;     (func url endpoint method &rest data)
+;;   (cond
+;;    ((member endpoint '("login"))
+;;     (ignore-error (jupyter-api-http-error)
+;;       (apply func url endpoint method data)))
+;;    (:else
+;;     (apply func url endpoint method data))))
+;; (advice-add
+;;  #'jupyter-api-http-request
+;;  :around #'my-jupyter-api-http-request--ignore-login-error-a)
+
+(use-package ein)
 (use-package jupyter
   :after org
+  :ensure (:build (:not elpaca--byte-compile))
   )
+(use-package cern-root-mode
+  :bind (:map c++-mode-map
+	     (("C-c C-c" . cern-root-eval-defun)
+	      ("C-c C-b" . cern-root-eval-buffer)
+	      ("C-c C-l" . cern-root-eval-file)
+	      ("C-c C-r" . cern-root-eval-region)))
+  :ensure (cern-root-mode :type git :host github :repo "jaypmorgan/cern-root-mode")
+  :config
+  ;; (setq cern-root-filepath "/snap/bin/root"))
+  ;; (setq cern-root-filepath "/opt/workprograms/miniforge3/envs/croot/bin/root"))
+  (setq cern-root-filepath "/opt/workprograms/miniforge3/bin/root"))
 
 (with-eval-after-load 'jupyter
   (org-babel-do-load-languages
@@ -587,12 +570,14 @@
      (latex . t)
      (julia . t)
      (python . t)
-     ;;(ein . t)
+     (octave . t)
+     (ein . t)
      (C . t)
      (dot . t)
      (jupyter . t)
      ))
   (org-babel-jupyter-override-src-block "julia")
+  ;; (org-babel-jupyter-override-src-block "python")
   (push '("conf-unix" . conf-unix) org-src-lang-modes) )
 
 
@@ -608,20 +593,20 @@
 (use-package evil-nerd-commenter
   :bind ("M-/" . evilnc-comment-or-uncomment-lines))
 
-;(when (equal system-type 'gnu/linux)
-;  (use-package vterm))
+(when (equal system-type 'gnu/linux)
+ (use-package vterm))
 
-;(use-package eshell-git-prompt)
+(use-package eshell-git-prompt
+  :after eshell
+  :config
+  (eshell-git-prompt-use-theme 'powerline)
+  
+  )
 
-;(use-package eshell
-  ;:config
-  ;(eshell-git-prompt-use-theme 'powerline)
-;  )
-
-;; (use-package pdf-tools
- ;; :config
- ;; (pdf-tools-install)
- ;; )
+(use-package pdf-tools
+ :config
+ (pdf-tools-install)
+ )
 
 (add-hook 'pdf-view-mode-hook (blink-cursor-mode -1))
 
@@ -656,10 +641,10 @@
   )
 
 (use-package org-ref)
-(use-package jsonrpc)
+;; (use-package jsonrpc)
 (use-package transient)
-(use-package eldoc
-  :after elpaca)
+;; (use-package eldoc
+;;   :after elpaca)
 
 ;;(use-package org-roam-bibtex)
 
@@ -667,12 +652,55 @@
  org-startup-with-latex-preview t
  )
 
-(use-package org-tufte
-  :ensure (:type git :host github :repo "Zilong-Li/org-tufte") 
-  :ensure nil
-  :init (add-to-list 'load-path "PATH*")
+;; (use-package org-tufte
+  ;; :ensure (:type git :host github :repo "Zilong-Li/org-tufte") 
+  ;; :ensure nil
+  ;; :init (add-to-list 'load-path "PATH*")
+  ;; :config
+  ;; (require 'org-tufte)
+  ;; (setq org-tufte-htmlize-code t)
+  ;; (setq org-tufte-embed-images t)
+  ;; )
+
+(use-package direnv
   :config
-  (require 'org-tufte)
-  (setq org-tufte-htmlize-code t)
-  (setq org-tufte-embed-images t)
-  )
+  (direnv-mode))
+
+;; (use-package ellama
+;;   :ensure t
+;;   :init
+;;   (require 'llm-ollama)
+;;   :custom
+;;   (ellama-provider
+;; 	  (make-llm-ollama
+;; 	   ;; this model should be pulled to use it
+;; 	   ;; value should be the same as you print in terminal during pull
+;; 	   :chat-model "deepseek-coder-v2"
+;; 	   ;; :embedding-model "nomic-embed-text"
+;; 	   ;; :default-chat-non-standard-params '(("num_ctx" . 8192))))
+;; 	   ))
+;;   )
+;; (use-package lean4-mode
+;;   :ensure (lean4-mode
+;; 	     :type git
+;; 	     :host github
+;; 	     :repo "leanprover/lean4-mode"
+;; 	     :files ("*.el" "data"))
+;;   ;; to defer loading the package until required
+;;   :commands (lean4-mode))
+
+(setq ispell-program-name "aspell")
+
+(use-package langtool)
+
+(use-package flycheck-languagetool
+  :ensure t
+  :hook (text-mode . flycheck-languagetool-setup)
+  :init
+  (setq flycheck-languagetool-server-jar "/snap/bin/languagetool"))
+
+(use-package diff-hl
+  :config
+  (global-diff-hl-mode 1)
+  (diff-hl-flydiff-mode 1) ; <- Crucial for real-time on-disk comparison
+)
